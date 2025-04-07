@@ -1,7 +1,21 @@
 {
+  "name": "recipebook",
+  "version": "1.0.0",
+  "description": "A recipe book system with CRUD, Express, MongoDB, and Postman support",
+  "main": "../main.js",
+  "scripts": {
+    "start": "node ../main.js",
+    "dev": "nodemon ../main.js"
+  },
+  "author": "YourName",
+  "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mongoose": "^8.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }
+

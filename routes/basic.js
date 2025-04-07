@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const Recipe = require("../schema/recipe"); // Use Mongoose model
-const { ObjectId } = require("mongodb");
+const mongoose = require("mongoose");
+const Recipe = require("../schema/recipe");
 
-// GET all recipes
+const { ObjectId } = mongoose.Types;
+
+// GET all recipes (WORKS)
 router.get("/recipes", async (req, res) => {
   try {
-    const recipes = await Recipe.find(); // Use Mongoose model
+    const recipes = await Recipe.find();
     res.json(recipes);
   } catch (error) {
     console.error("Error fetching recipes:", error);
@@ -14,14 +16,14 @@ router.get("/recipes", async (req, res) => {
   }
 });
 
-// GET a single recipe by ID
+// GET a single recipe by ID (WORKS)
 router.get("/recipes/:id", async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ error: "Invalid recipe ID format" });
     }
 
-    const recipe = await Recipe.findById(req.params.id); // Use Mongoose
+    const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ error: "Recipe not found!" });
 
     res.json(recipe);
@@ -31,39 +33,40 @@ router.get("/recipes/:id", async (req, res) => {
   }
 });
 
-// Search recipes by name
+// Search recipes by name (WORKS)
 router.get("/search/:query", async (req, res) => {
   try {
-      const recipes = await Recipe.find({ name: { $regex: req.params.query, $options: "i" } });
-      res.json(recipes);
+    const recipes = await Recipe.find({ name: { $regex: req.params.query, $options: "i" } });
+    res.json(recipes);
   } catch (error) {
-      res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-
-// Get recipes by category
+  // Get recipes by category (WORKS)
 router.get("/category/:category", async (req, res) => {
   try {
-      const recipes = await Recipe.find({ category: { $regex: req.params.category, $options: "i" } });
-      res.json(recipes);
+    const recipes = await Recipe.find({ category: { $regex: req.params.category, $options: "i" } });
+    res.json(recipes);
   } catch (error) {
-      res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
+// Get favorite recipes (STILL ON PROGRESS)
 router.get("/recipes/favorites", async (req, res) => {
   try {
-    const favoriteRecipes = await Recipe.find({ favorite: "true" }); // Check for string "true"
-    res.json(favoriteRecipes);
+    const favorites = await Recipe.find({ favorite: true });
+    res.json(favorites);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch favorite recipes" });
   }
 });
 
+// Paginate recipes (IN PROGRESS)
 router.get("/recipes/paginate", async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 results per page
+    const { page = 1, limit = 10 } = req.query;
     const recipes = await Recipe.find()
       .skip((parseInt(page) - 1) * parseInt(limit))
       .limit(parseInt(limit));
@@ -74,6 +77,7 @@ router.get("/recipes/paginate", async (req, res) => {
   }
 });
 
+// Top 10 popular ingredients (STILL ON PROGRESS)
 router.get("/recipes/popular-ingredients", async (req, res) => {
   try {
     const ingredients = await Recipe.aggregate([
@@ -89,6 +93,7 @@ router.get("/recipes/popular-ingredients", async (req, res) => {
   }
 });
 
+// Find by ingredient list (STILL ON PROGRESS)
 router.get("/recipes/ingredients", async (req, res) => {
   try {
     const { ingredients } = req.query;
@@ -105,6 +110,7 @@ router.get("/recipes/ingredients", async (req, res) => {
   }
 });
 
+// Recently added recipes (WORKS)
 router.get("/recipes/recent/:days", async (req, res) => {
   try {
     const { days } = req.params;
@@ -118,12 +124,10 @@ router.get("/recipes/recent/:days", async (req, res) => {
   }
 });
 
-
-
-// POST a new recipe
+  // POST a new recipe (WORKS)
 router.post("/recipes", async (req, res) => {
   try {
-    const newRecipe = new Recipe(req.body); // Use Mongoose model
+    const newRecipe = new Recipe(req.body);
     const savedRecipe = await newRecipe.save();
     res.status(201).json(savedRecipe);
   } catch (error) {
@@ -132,6 +136,7 @@ router.post("/recipes", async (req, res) => {
   }
 });
 
+// Add a review (WORKS)
 router.post("/recipes/:id/review", async (req, res) => {
   try {
     const { id } = req.params;
@@ -146,18 +151,17 @@ router.post("/recipes/:id/review", async (req, res) => {
       return res.status(404).json({ error: "Recipe not found" });
     }
 
-    if (!recipe.reviews) recipe.reviews = [];
-    recipe.reviews.push({ rating, comment, date: new Date() });
-    
+
+    recipe.reviews.push({ rating, comment, date: new Date() })
     await recipe.save();
+
     res.json({ message: "Review added successfully", recipe });
   } catch (error) {
     res.status(500).json({ error: "Failed to add review" });
   }
 });
 
-
-// PUT (Update) a recipe by ID
+// PUT - Update a recipe (WORKS)
 router.put("/recipes/:id", async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
@@ -177,7 +181,7 @@ router.put("/recipes/:id", async (req, res) => {
   }
 });
 
-// DELETE a recipe by ID
+// DELETE - Remove a recipe (WORKS)
 router.delete("/recipes/:id", async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
@@ -197,18 +201,20 @@ router.delete("/recipes/:id", async (req, res) => {
   }
 });
 
+// PATCH - Toggle favorite (WORKS)
 router.patch("/:id/favorite", async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ error: "Recipe not found" });
 
-    recipe.favorite = recipe.favorite === "true" ? "false" : "true"; // Convert boolean logic to string
+    recipe.favorite = !recipe.favorite;
     await recipe.save();
 
-    res.json({ message: `Recipe marked as favorite: ${recipe.favorite}`, recipe });
+    res.json({ message: `Recipe favorite status: ${recipe.favorite}`, recipe });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }
 });
 
 module.exports = router;
+
