@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongoosePaginate = require('mongoose-paginate-v2'); // Add this for pagination
 
 const recipeSchema = new mongoose.Schema({
   name: { 
@@ -15,7 +16,8 @@ const recipeSchema = new mongoose.Schema({
     validate: {
       validator: v => v.length > 0,
       message: "At least one ingredient is required"
-    }
+    },
+    index: true // Add index for better ingredient search
   },
   instructions: { 
     type: [String], 
@@ -44,5 +46,15 @@ const recipeSchema = new mongoose.Schema({
 }, { 
   timestamps: true 
 });
+
+// Add text index for better searching (supports your existing search endpoints)
+recipeSchema.index({
+  name: 'text',
+  category: 'text',
+  'ingredients': 'text'
+});
+
+// Enable pagination plugin (required for paginate endpoint)
+recipeSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model("Recipe", recipeSchema);

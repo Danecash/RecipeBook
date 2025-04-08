@@ -53,60 +53,115 @@ router.get("/category/:category", async (req, res) => {
   }
 });
 
-// Get favorite recipes (STILL ON PROGRESS)
-router.get("/recipes/favorites", async (req, res) => {
+// Get favorite recipes (WORKS)
+router.get("/favorites", async (req, res) => { // Changed from "/recipes/favorites"
   try {
     const favorites = await Recipe.find({ favorite: true });
-    res.json(favorites);
+    res.json({
+      success: true,
+      count: favorites.length,
+      data: favorites
+    });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch favorite recipes" });
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to fetch favorite recipes",
+      details: error.message 
+    });
   }
 });
 
-// Paginate recipes (IN PROGRESS)
-router.get("/recipes/paginate", async (req, res) => {
+// Paginate recipes (WORKS)
+router.get("/paginate", async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const recipes = await Recipe.find()
-      .skip((parseInt(page) - 1) * parseInt(limit))
-      .limit(parseInt(limit));
+    const { page = 1, limit = 10, sort = '-createdAt' } = req.query;
+    
+    // Validate and sanitize inputs
+    const options = {
+      page: Math.max(1, parseInt(page)),
+      limit: Math.min(50, Math.max(1, parseInt(limit))), // Max 50 items per page
+      sort: sort // Sorts by newest first by default
+    };
 
-    res.json(recipes);
+    // If you need to filter by category or other fields:
+    const query = {};
+    if (req.query.category) {
+      query.category = { $regex: req.query.category, $options: 'i' };
+    }
+
+    const result = await Recipe.paginate(query, options);
+
+    res.json({
+      success: true,
+      data: result.docs,
+      pagination: {
+        currentPage: result.page,
+        totalPages: result.totalPages,
+        totalItems: result.totalDocs,
+        itemsPerPage: result.limit
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch paginated recipes" });
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch paginated recipes",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
-// Top 10 popular ingredients (STILL ON PROGRESS)
-router.get("/recipes/popular-ingredients", async (req, res) => {
+// Top 10 popular ingredients (WORKS)
+router.get("/popular-ingredients", async (req, res) => { // Changed from "/recipes/popular-ingredients"
   try {
     const ingredients = await Recipe.aggregate([
       { $unwind: "$ingredients" },
-      { $group: { _id: "$ingredients", count: { $sum: 1 } } },
+      { $group: { 
+          _id: "$ingredients", 
+          count: { $sum: 1 }
+      }},
       { $sort: { count: -1 } },
       { $limit: 10 }
     ]);
 
-    res.json(ingredients);
+    res.json({
+      success: true,
+      data: ingredients.map(item => ({
+        ingredient: item._id,
+        count: item.count
+      }))
+    });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch popular ingredients" });
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch popular ingredients",
+      details: error.message
+    });
   }
 });
 
 // Find by ingredient list (STILL ON PROGRESS)
-router.get("/recipes/ingredients", async (req, res) => {
+router.get("/search/ingredients", async (req, res) => {
   try {
-    const { ingredients } = req.query;
-    if (!ingredients) {
-      return res.status(400).json({ error: "Ingredients query parameter is required" });
+    const allRecipes = await Recipe.find({});
+    const { q } = req.query;
+
+    if (!q) {
+      return res.status(400).json({ error: "Query parameter 'q' is required" });
     }
 
-    const ingredientArray = ingredients.split(",");
-    const recipes = await Recipe.find({ ingredients: { $all: ingredientArray } });
+    const searchTerms = q.toLowerCase().split(',').map(t => t.trim());
 
-    res.json(recipes);
+    const results = allRecipes.filter(recipe => 
+      searchTerms.every(term =>
+        recipe.ingredients.some(ing => 
+          ing.toLowerCase().includes(term)
+        )
+      )
+    );
+
+    res.json(results);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch recipes by ingredients" });
+    res.status(500).json({ error: "Search failed", details: error.message });
   }
 });
 
@@ -125,16 +180,56 @@ router.get("/recipes/recent/:days", async (req, res) => {
 });
 
   // POST a new recipe (WORKS)
-router.post("/recipes", async (req, res) => {
-  try {
-    const newRecipe = new Recipe(req.body);
-    const savedRecipe = await newRecipe.save();
-    res.status(201).json(savedRecipe);
-  } catch (error) {
-    console.error("Error adding recipe:", error);
-    res.status(500).json({ error: "Failed to add recipe" });
-  }
-});
+  router.post("/recipes", async (req, res) => {
+    try {
+      // Validate required fields first
+      const { name, category, ingredients, instructions } = req.body;
+      
+      // Manual validation
+      if (!name) return res.status(400).json({ error: "Recipe name is required" });
+      if (!category) return res.status(400).json({ error: "Category is required" });
+      if (!ingredients || !ingredients.length) {
+        return res.status(400).json({ error: "At least one ingredient is required" });
+      }
+      if (!instructions || !instructions.length) {
+        return res.status(400).json({ error: "At least one instruction is required" });
+      }
+  
+      // Create and save recipe
+      const newRecipe = new Recipe({
+        name,
+        category,
+        ingredients,
+        instructions,
+        // Include optional fields if provided
+        ...(req.body.description && { description: req.body.description }),
+        ...(req.body.prepTime && { prepTime: req.body.prepTime }),
+        ...(req.body.cookTime && { cookTime: req.body.cookTime }),
+        ...(req.body.servings && { servings: req.body.servings })
+      });
+  
+      const savedRecipe = await newRecipe.save();
+      res.status(201).json(savedRecipe);
+      
+    } catch (error) {
+      console.error("Error adding recipe:", error);
+      
+      // Enhanced error response
+      const errorResponse = {
+        error: "Failed to add recipe",
+        details: error.message
+      };
+      
+      if (error.name === 'ValidationError') {
+        errorResponse.validationErrors = Object.values(error.errors).map(err => ({
+          field: err.path,
+          message: err.message
+        }));
+      }
+      
+      res.status(500).json(errorResponse);
+    }
+  });
 
 // Add a review (WORKS)
 router.post("/recipes/:id/review", async (req, res) => {
