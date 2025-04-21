@@ -1,10 +1,24 @@
 const path = require('path');
+const express = require("express");
+const cors = require('cors');
+const connectDB = require("./config/db");
+const basicRoutes = require("./routes/basic");
 
-// 1. Configure module paths to use package/node_modules
-process.env.NODE_PATH = path.join(__dirname, '../package/node_modules');
-require('module').Module._initPaths();
+const app = express(); // Declare `app` only once
+const PORT = process.env.PORT || 3000;
 
-// 2. Load environment variables with absolute path
+// Middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // Allow requests from the frontend
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+}));
+
+app.use(express.json());
+app.use("/api", basicRoutes); // All routes will be prefixed with /api
+
+// Load environment variables
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // Debug output
@@ -13,18 +27,6 @@ console.log('📋 Environment Variables Loaded:', {
   MONGO_URI: process.env.MONGO_URI ? '✅ Loaded (hidden for security)' : '❌ Missing',
   PORT: process.env.PORT || '3000 (default)'
 });
-
-// 3. Main application
-const express = require("express");
-const connectDB = require("./config/db");
-const basicRoutes = require("./routes/basic");
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
-app.use(express.json());
-app.use("/", basicRoutes);
 
 // Server startup
 const startServer = async () => {

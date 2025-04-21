@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const Recipe = require("../schema/recipe");
+const Recipe = require("../models/recipe");
 
 const { ObjectId } = mongoose.Types;
 
