@@ -1,3 +1,5 @@
+// backend/main.js
+
 const path = require('path');
 const express = require("express");
 const cors = require('cors');
@@ -7,6 +9,9 @@ const basicRoutes = require("./routes/basic");
 const app = express(); // Declare `app` only once
 const PORT = process.env.PORT || 3000;
 
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
+
 // Middleware
 app.use(cors({
   origin: 'http://localhost:5173', // Allow requests from the frontend
@@ -15,7 +20,18 @@ app.use(cors({
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 }));
 
+// Serve static files - exact path matching
+app.use('/backend/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res) => {
+    res.set('Access-Control-Allow-Origin', 'http://localhost:5173');
+  }
+}));
+
 app.use(express.json());
+
+// Serve static files from the uploads folder
+app.use('/backend/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use("/api", basicRoutes); // All routes will be prefixed with /api
 
 // Load environment variables

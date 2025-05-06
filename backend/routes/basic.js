@@ -1,362 +1,256 @@
+//backend/routes/basic.js
+
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const Recipe = require("../models/recipe");
-
 const { ObjectId } = mongoose.Types;
 
-// GET all recipes (WORKS)
+const upload = require("../utils/upload");
+const validateRecipeData = require("../middlewares/validateRecipe");
+const { formatRecipeImage, serverError } = require("../utils/helpers");
+const Recipe = require("../models/recipe");
+
+// GET all recipes
 router.get("/recipes", async (req, res) => {
   try {
-    const recipes = await Recipe.find();
+    const recipes = await Recipe.find()
+      .select('+imageOptimized')
+      .lean()
+      .transform(docs => docs.map(formatRecipeImage));
     res.json(recipes);
   } catch (error) {
-    console.error("Error fetching recipes:", error);
-    res.status(500).json({ error: "Failed to fetch recipes" });
+    console.error("GET /recipes error:", error);
+    res.status(500).json(serverError(error));
   }
 });
 
-// GET a single recipe by ID (WORKS)
+// GET single recipe
 router.get("/recipes/:id", async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ error: "Invalid recipe ID format" });
     }
+    const recipe = await Recipe.findById(req.params.id)
+      .select('+imageOptimized')
+      .lean()
+      .transform(doc => doc ? formatRecipeImage(doc) : null);
 
-    const recipe = await Recipe.findById(req.params.id);
-    if (!recipe) return res.status(404).json({ error: "Recipe not found!" });
-
+    if (!recipe) return res.status(404).json({ error: "Recipe not found" });
     res.json(recipe);
   } catch (error) {
-    console.error("Error retrieving recipe:", error);
-    res.status(500).json({ error: "Error retrieving recipe" });
+    console.error(`GET /recipes/${req.params.id} error:`, error);
+    res.status(500).json(serverError(error));
   }
 });
 
-// Search recipes by name (WORKS)
+// SEARCH recipes
 router.get("/search/:query", async (req, res) => {
   try {
-    const recipes = await Recipe.find({ name: { $regex: req.params.query, $options: "i" } });
+    const recipes = await Recipe.find({
+      $or: [
+        { name: { $regex: req.params.query, $options: "i" } },
+        { ingredients: { $regex: req.params.query, $options: "i" } }
+      ]
+    })
+    .select('+imageOptimized')
+    .lean()
+    .transform(docs => docs.map(formatRecipeImage));
     res.json(recipes);
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    console.error("GET /search error:", error);
+    res.status(500).json(serverError(error));
   }
 });
 
-  // Get recipes by category (WORKS)
+// GET recipes by category
 router.get("/category/:category", async (req, res) => {
   try {
-    const recipes = await Recipe.find({ category: { $regex: req.params.category, $options: "i" } });
-    res.json(recipes);
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
 
-// Get favorite recipes (WORKS)
-router.get("/favorites", async (req, res) => { // Changed from "/recipes/favorites"
-  try {
-    const favorites = await Recipe.find({ favorite: true });
-    res.json({
-      success: true,
-      count: favorites.length,
-      data: favorites
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false,
-      error: "Failed to fetch favorite recipes",
-      details: error.message 
-    });
-  }
-});
-
-// Paginate recipes (WORKS)
-router.get("/paginate", async (req, res) => {
-  try {
-    const { page = 1, limit = 10, sort = '-createdAt' } = req.query;
-    
-    // Validate and sanitize inputs
-    const options = {
-      page: Math.max(1, parseInt(page)),
-      limit: Math.min(50, Math.max(1, parseInt(limit))), // Max 50 items per page
-      sort: sort // Sorts by newest first by default
-    };
-
-    // If you need to filter by category or other fields:
-    const query = {};
-    if (req.query.category) {
-      query.category = { $regex: req.query.category, $options: 'i' };
-    }
-
-    const result = await Recipe.paginate(query, options);
-
-    res.json({
-      success: true,
-      data: result.docs,
-      pagination: {
-        currentPage: result.page,
-        totalPages: result.totalPages,
-        totalItems: result.totalDocs,
-        itemsPerPage: result.limit
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch paginated recipes",
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-// Top 10 popular ingredients (WORKS)
-router.get("/popular-ingredients", async (req, res) => { // Changed from "/recipes/popular-ingredients"
-  try {
-    const ingredients = await Recipe.aggregate([
-      { $unwind: "$ingredients" },
-      { $group: { 
-          _id: "$ingredients", 
-          count: { $sum: 1 }
-      }},
-      { $sort: { count: -1 } },
-      { $limit: 10 }
+    const [recipes, total] = await Promise.all([
+      Recipe.find({ category: { $regex: req.params.category, $options: "i" } })
+        .select('+imageOptimized')
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .transform(docs => docs.map(formatRecipeImage)),
+      Recipe.countDocuments({ category: { $regex: req.params.category, $options: "i" } })
     ]);
 
     res.json({
+      data: recipes,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: limit
+      }
+    });
+  } catch (error) {
+    console.error("GET /category error:", error);
+    res.status(500).json(serverError(error));
+  }
+});
+
+// backend/routes/basic.js
+// Update the category endpoint:
+router.get("/category/:category", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
+    const [recipes, total] = await Promise.all([
+      Recipe.find({ category: { $regex: req.params.category, $options: "i" } })
+        .skip(skip)
+        .limit(limit),
+      Recipe.countDocuments({ category: { $regex: req.params.category, $options: "i" } })
+    ]);
+
+    res.json({
+      data: recipes,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: limit
+      }
+    });
+  } catch (error) {
+    res.status(500).json(serverError(error));
+  }
+});
+
+// CREATE recipe
+router.post("/recipes", upload.single('image'), validateRecipeData, async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "Recipe image is required" });
+
+    const { name, category } = req.body;
+    const { ingredients, instructions } = req.parsedData;
+    const categoryDir = category.toLowerCase().replace(/\s+/g, '-');
+    const imagePath = `/backend/uploads/${categoryDir}/${req.file.filename}`;
+
+    const newRecipe = new Recipe({
+      name: name.trim(),
+      category: category.trim(),
+      ingredients,
+      instructions,
+      image: imagePath,
+      imageOptimized: `${imagePath}?w=800&h=600&fit=cover`
+    });
+
+    const savedRecipe = await newRecipe.save();
+    res.status(201).json({
       success: true,
-      data: ingredients.map(item => ({
-        ingredient: item._id,
-        count: item.count
-      }))
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch popular ingredients",
-      details: error.message
-    });
-  }
-});
-
-// Find by ingredient list (STILL ON PROGRESS)
-router.get("/search/ingredients", async (req, res) => {
-  try {
-    const { q } = req.query;
-
-    if (!q) {
-      return res.status(400).json({ error: "Query parameter 'q' is required" });
-    }
-
-    // Step 1: Brute-force normalization for testing
-    const normalize = (str) => {
-      return str.toString()
-        .toLowerCase()
-        .replace(/[^a-z]/g, '') // Remove ALL non-letters
-        .trim();
-    };
-
-    // Step 2: Get ALL recipes (temporary for debugging)
-    const allRecipes = await Recipe.find({});
-    console.log("All Recipes:", allRecipes);
-
-    // Step 3: Filter in JavaScript (guaranteed to work)
-    const searchTerms = q.split(',')
-      .map(term => normalize(term))
-      .filter(term => term.length > 0);
-
-    console.log("Search Terms (Normalized):", searchTerms);
-
-    const results = allRecipes.filter(recipe => {
-      // Normalize ingredients (adjust based on actual schema)
-      const normalizedIngredients = recipe.ingredients.map(ingredient => normalize(ingredient));
-      console.log("Normalized Ingredients for Recipe:", normalizedIngredients);
-
-      return searchTerms.every(searchTerm =>
-        normalizedIngredients.some(ingredient => ingredient.includes(searchTerm))
-      );
+      recipe: formatRecipeImage(savedRecipe.toObject())
     });
 
-    // Step 4: Log the actual matching for debugging
-    console.log("Search Debug:", {
-      searchTerms,
-      matchCount: results.length
-    });
-
-    res.json(results);
-
   } catch (error) {
-    console.error("Search error:", error);
-    res.status(500).json({ 
-      error: "Search failed",
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    console.error("POST /recipes error:", error);
+    if (req.file?.path) fs.unlink(req.file.path, () => {});
+    res.status(500).json(serverError(error));
   }
 });
 
-// Test normalization (WORKS)
-router.get('/test-normalization-extreme', async (req, res) => {
-  const testCases = [
-    "flour",
-    "Flour",
-    "2 1/4 cups flour",
-    "1 tbsp garlic powder",
-    "3/4 cup milk"
-  ];
+// backend/routes/basic.js
+// Add these routes:
 
-  const normalize = (str) => str.toString().toLowerCase().replace(/[^a-z]/g, '');
-
-  res.json(testCases.map(original => ({
-    original,
-    normalized: normalize(original),
-    wouldMatchFlour: normalize(original).includes('flour'),
-    wouldMatchMilk: normalize(original).includes('milk')
-  })));
-});
-
-// Recently added recipes (WORKS)
-router.get("/recipes/recent/:days", async (req, res) => {
-  try {
-    const { days } = req.params;
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - parseInt(days));
-
-    const recipes = await Recipe.find({ createdAt: { $gte: cutoffDate } });
-    res.json(recipes);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch recent recipes" });
-  }
-});
-
-  // POST a new recipe (WORKS)
-  router.post("/recipes", async (req, res) => {
-    try {
-      // Validate required fields first
-      const { name, category, ingredients, instructions } = req.body;
-      
-      // Manual validation
-      if (!name) return res.status(400).json({ error: "Recipe name is required" });
-      if (!category) return res.status(400).json({ error: "Category is required" });
-      if (!ingredients || !ingredients.length) {
-        return res.status(400).json({ error: "At least one ingredient is required" });
-      }
-      if (!instructions || !instructions.length) {
-        return res.status(400).json({ error: "At least one instruction is required" });
-      }
-  
-      // Create and save recipe
-      const newRecipe = new Recipe({
-        name,
-        category,
-        ingredients,
-        instructions,
-        // Include optional fields if provided
-        ...(req.body.description && { description: req.body.description }),
-        ...(req.body.prepTime && { prepTime: req.body.prepTime }),
-        ...(req.body.cookTime && { cookTime: req.body.cookTime }),
-        ...(req.body.servings && { servings: req.body.servings })
-      });
-  
-      const savedRecipe = await newRecipe.save();
-      res.status(201).json(savedRecipe);
-      
-    } catch (error) {
-      console.error("Error adding recipe:", error);
-      
-      // Enhanced error response
-      const errorResponse = {
-        error: "Failed to add recipe",
-        details: error.message
-      };
-      
-      if (error.name === 'ValidationError') {
-        errorResponse.validationErrors = Object.values(error.errors).map(err => ({
-          field: err.path,
-          message: err.message
-        }));
-      }
-      
-      res.status(500).json(errorResponse);
-    }
-  });
-
-// Add a review (WORKS)
-router.post("/recipes/:id/review", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { rating, comment } = req.body;
-
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid recipe ID format" });
-    }
-
-    const recipe = await Recipe.findById(id);
-    if (!recipe) {
-      return res.status(404).json({ error: "Recipe not found" });
-    }
-
-
-    recipe.reviews.push({ rating, comment, date: new Date() })
-    await recipe.save();
-
-    res.json({ message: "Review added successfully", recipe });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to add review" });
-  }
-});
-
-// PUT - Update a recipe (WORKS)
-router.put("/recipes/:id", async (req, res) => {
-  try {
-    if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid recipe ID format" });
-    }
-
-    const updatedRecipe = await Recipe.findByIdAndUpdate(req.params.id, req.body, { new: true });
-
-    if (!updatedRecipe) {
-      return res.status(404).json({ error: "Recipe not found" });
-    }
-
-    res.json({ message: "Recipe updated successfully", updatedRecipe });
-  } catch (error) {
-    console.error("Error updating recipe:", error);
-    res.status(500).json({ error: "Failed to update recipe" });
-  }
-});
-
-// DELETE - Remove a recipe (WORKS)
-router.delete("/recipes/:id", async (req, res) => {
-  try {
-    if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "Invalid recipe ID format" });
-    }
-
-    const deletedRecipe = await Recipe.findByIdAndDelete(req.params.id);
-
-    if (!deletedRecipe) {
-      return res.status(404).json({ error: "Recipe not found" });
-    }
-
-    res.json({ message: "Recipe deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting recipe:", error);
-    res.status(500).json({ error: "Failed to delete recipe" });
-  }
-});
-
-// PATCH - Toggle favorite (WORKS)
-router.patch("/:id/favorite", async (req, res) => {
+// Toggle favorite
+// Update the favorite route to use authenticated user
+router.post('/recipes/:id/favorite', async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ error: "Recipe not found" });
 
-    recipe.favorite = !recipe.favorite;
-    await recipe.save();
+    const userId = req.user._id; // From authentication middleware
 
-    res.json({ message: `Recipe favorite status: ${recipe.favorite}`, recipe });
+    const index = recipe.favorites.indexOf(userId);
+    if (index === -1) {
+      recipe.favorites.push(userId);
+      recipe.favoriteCount += 1;
+    } else {
+      recipe.favorites.splice(index, 1);
+      recipe.favoriteCount -= 1;
+    }
+
+    await recipe.save();
+    res.json({ success: true, favoriteCount: recipe.favoriteCount });
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json(serverError(error));
+  }
+});
+
+// Get favorite recipes
+router.get('/favorites', async (req, res) => {
+  try {
+    // In a real app, you'd use req.user._id
+    const userId = "temp-user-id"; // Replace with actual user ID
+    const recipes = await Recipe.find({ favorites: userId });
+    res.json(recipes);
+  } catch (error) {
+    res.status(500).json(serverError(error));
+  }
+});
+
+// UPDATE recipe
+router.put("/recipes/:id", upload.single('image'), validateRecipeData, async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid recipe ID format" });
+    }
+
+    const updateData = {
+      name: req.body.name.trim(),
+      category: req.body.category.trim(),
+      ingredients: req.parsedData.ingredients,
+      instructions: req.parsedData.instructions
+    };
+
+    if (req.file) {
+      const category = req.body.category.toLowerCase().replace(/\s+/g, '-');
+      updateData.image = `/backend/uploads/${category}/${req.file.filename}`;
+      updateData.imageOptimized = `${updateData.image}?w=800&h=600&fit=cover`;
+    }
+
+    const updatedRecipe = await Recipe.findByIdAndUpdate(
+      req.params.id, updateData, { new: true, runValidators: true }
+    ).lean();
+
+    if (!updatedRecipe) return res.status(404).json({ error: "Recipe not found" });
+
+    res.json(formatRecipeImage(updatedRecipe));
+  } catch (error) {
+    console.error(`PUT /recipes/${req.params.id} error:`, error);
+    res.status(500).json(serverError(error));
+  }
+});
+
+// OPTIMIZE images (Admin)
+router.get("/optimize-images", async (req, res) => {
+  try {
+    const recipes = await Recipe.find({
+      image: { $exists: true },
+      imageOptimized: { $exists: false }
+    });
+
+    const updates = recipes.map(recipe =>
+      Recipe.updateOne(
+        { _id: recipe._id },
+        { $set: { imageOptimized: `${recipe.image}?w=800&h=600&fit=cover` } }
+      )
+    );
+
+    await Promise.all(updates);
+    res.json({
+      success: true,
+      message: `${updates.length} images optimized`
+    });
+  } catch (error) {
+    console.error("GET /optimize-images error:", error);
+    res.status(500).json(serverError(error));
   }
 });
 

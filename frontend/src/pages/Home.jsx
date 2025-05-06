@@ -1,88 +1,49 @@
-import { useState, useEffect } from 'react';
-import { Container, Typography, Box, Grid, Button } from '@mui/material';
-import { fetchRecentRecipes, fetchPopularIngredients } from '../services/api';
-import RecipeList from '../components/RecipeList';
-import SearchBar from '../components/SearchBar';
+// frontend/src/pages/Home.jsx
+
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getRecipes } from '../services/api';
+import RecipeCard from '../components/RecipeCard';
 
 const Home = () => {
-  const [recentRecipes, setRecentRecipes] = useState([]);
-  const [popularIngredients, setPopularIngredients] = useState([]);
+  const [featuredRecipes, setFeaturedRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchFeaturedRecipes = async () => {
       try {
-        const [recipesResponse, ingredientsResponse] = await Promise.all([
-          fetchRecentRecipes(7), // Last 7 days
-          fetchPopularIngredients()
-        ]);
-        
-        setRecentRecipes(recipesResponse.data);
-        setPopularIngredients(ingredientsResponse.data);
+        const response = await getRecipes();
+        // Get 4 random recipes to feature
+        const shuffled = response.data.sort(() => 0.5 - Math.random());
+        setFeaturedRecipes(shuffled.slice(0, 4));
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching recipes:', error);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchData();
+    fetchFeaturedRecipes();
   }, []);
 
-  const handleFavoriteToggle = (recipeId) => {
-    setRecentRecipes(prevRecipes => 
-      prevRecipes.map(recipe => 
-        recipe._id === recipeId ? { ...recipe, favorite: !recipe.favorite } : recipe
-      )
-    );
-  };
+  if (loading) return <div className="loading">Loading recipes...</div>;
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ my: 4, textAlign: 'center' }}>
-        <Typography variant="h2" component="h1" gutterBottom>
-          Welcome to Recipe Finder
-        </Typography>
-        <Typography variant="h5" color="text.secondary">
-          Discover, create, and share your favorite recipes
-        </Typography>
-      </Box>
+    <div className="home-page">
+      <section className="hero">
+        <h1>Welcome to Recipe Collection</h1>
+        <p>Discover delicious recipes for every occasion</p>
+        <Link to="/add-recipe" className="cta-button">Add Your Recipe</Link>
+      </section>
 
-      <Box sx={{ my: 4 }}>
-        <SearchBar />
-      </Box>
-
-      <Box sx={{ my: 6 }}>
-        <Typography variant="h4" gutterBottom>
-          Recently Added Recipes
-        </Typography>
-        <RecipeList 
-          recipes={recentRecipes} 
-          loading={loading} 
-          onFavoriteToggle={handleFavoriteToggle} 
-        />
-        <Box sx={{ textAlign: 'center', mt: 2 }}>
-          <Button variant="outlined" href="/recipes" size="large">
-            View All Recipes
-          </Button>
-        </Box>
-      </Box>
-
-      <Box sx={{ my: 6 }}>
-        <Typography variant="h4" gutterBottom>
-          Popular Ingredients
-        </Typography>
-        <Grid container spacing={2}>
-          {popularIngredients.map((ingredient, index) => (
-            <Grid item key={index}>
-              <Button variant="contained" color="secondary">
-                {ingredient.ingredient} ({ingredient.count})
-              </Button>
-            </Grid>
+      <section className="featured-recipes">
+        <h2>Featured Recipes</h2>
+        <div className="recipes-grid">
+          {featuredRecipes.map(recipe => (
+            <RecipeCard key={recipe._id} recipe={recipe} />
           ))}
-        </Grid>
-      </Box>
-    </Container>
+        </div>
+      </section>
+    </div>
   );
 };
 

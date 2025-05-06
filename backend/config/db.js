@@ -1,3 +1,6 @@
+//backend/config/db.js
+// MongoDB connection configuration with enhanced error handling and logging
+
 const mongoose = require('mongoose');
 
 // Connection with enhanced options and debugging
@@ -32,13 +35,13 @@ const connectDB = async () => {
     console.error('\n❌ MongoDB Connection Failed:');
     console.error('   • Error:', error.message);
     console.error('   • Reason:', error.reason || 'Unknown');
-    
+
     if (error.code === 'ENOTFOUND') {
       console.error('   • Solution: Check your network connection or MongoDB Atlas URL');
     } else if (error.code === 'ETIMEOUT') {
       console.error('   • Solution: Increase timeout in db.js or check MongoDB status');
     }
-    
+
     process.exit(1);
   }
 };
