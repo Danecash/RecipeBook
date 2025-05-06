@@ -1,5 +1,4 @@
 // frontend/src/components/RecipeImage.jsx
-
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
@@ -36,6 +35,11 @@ const RecipeImage = ({ recipe, className = '' }) => {
       />
     </div>
   );
+};
+
+RecipeImage.propTypes = {
+  recipe: PropTypes.object.isRequired,
+  className: PropTypes.string
 };
 
 export default RecipeImage;

@@ -1,5 +1,4 @@
 // frontend/src/components/RecipeCard.jsx
-
 import { Link } from 'react-router-dom';
 import RecipeImage from './RecipeImage';
 

@@ -1,29 +1,36 @@
 // frontend/src/pages/Home.jsx
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
+import Pagination from '../components/Pagination';
 
 const Home = () => {
-  const [featuredRecipes, setFeaturedRecipes] = useState([]);
+  const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 8; // Items per page
 
   useEffect(() => {
-    const fetchFeaturedRecipes = async () => {
+    const fetchRecipes = async () => {
       try {
-        const response = await getRecipes();
-        // Get 4 random recipes to feature
-        const shuffled = response.data.sort(() => 0.5 - Math.random());
-        setFeaturedRecipes(shuffled.slice(0, 4));
+        setLoading(true);
+        const response = await getRecipes(currentPage, limit);
+        setRecipes(response.data.data);
+        setTotalPages(response.data.pagination.totalPages);
       } catch (error) {
         console.error('Error fetching recipes:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchFeaturedRecipes();
-  }, []);
+    fetchRecipes();
+  }, [currentPage]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   if (loading) return <div className="loading">Loading recipes...</div>;
 
@@ -36,12 +43,18 @@ const Home = () => {
       </section>
 
       <section className="featured-recipes">
-        <h2>Featured Recipes</h2>
+        <h2>All Recipes</h2>
         <div className="recipes-grid">
-          {featuredRecipes.map(recipe => (
+          {recipes.map(recipe => (
             <RecipeCard key={recipe._id} recipe={recipe} />
           ))}
         </div>
+        
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </section>
     </div>
   );

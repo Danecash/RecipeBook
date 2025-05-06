@@ -3,11 +3,13 @@
 import axios from 'axios';
 export const toggleFavorite = (recipeId) => api.post(`/recipes/${recipeId}/favorite`);
 export const getFavorites = () => api.get('/favorites');
+export const deleteRecipe = (id) => api.delete(`/recipes/${id}`);
 
 const api = axios.create({
   baseURL: 'http://localhost:3000/api',
   timeout: 10000, // 10 second timeout
 });
+
 
 // Request interceptor for logging
 api.interceptors.request.use(config => {
@@ -49,7 +51,14 @@ api.interceptors.response.use(response => {
   }
 });
 
-export const getRecipes = () => api.get('/recipes');
+export const getRecipes = (page = 1, limit = 8) => {
+  return api.get('/recipes', {
+    params: {
+      page,
+      limit
+    }
+  });
+};
 export const getRecipeById = (id) => api.get(`/recipes/${id}`);
 export const getRecipesByCategory = (category) => api.get(`/category/${category}`);
 export const searchRecipes = (query) => api.get(`/search/${query}`);

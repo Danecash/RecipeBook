@@ -3,21 +3,43 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const { ObjectId } = mongoose.Types;
+
 
 const upload = require("../utils/upload");
 const validateRecipeData = require("../middlewares/validateRecipe");
 const { formatRecipeImage, serverError } = require("../utils/helpers");
 const Recipe = require("../models/recipe");
 
+const fs = require('fs');
+const path = require('path');
+const { ObjectId } = require('mongoose').Types;
+
 // GET all recipes
 router.get("/recipes", async (req, res) => {
   try {
-    const recipes = await Recipe.find()
-      .select('+imageOptimized')
-      .lean()
-      .transform(docs => docs.map(formatRecipeImage));
-    res.json(recipes);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 8;
+    const skip = (page - 1) * limit;
+
+    const [recipes, total] = await Promise.all([
+      Recipe.find()
+        .select('+imageOptimized')
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .transform(docs => docs.map(formatRecipeImage)),
+      Recipe.countDocuments()
+    ]);
+
+    res.json({
+      data: recipes,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: limit
+      }
+    });
   } catch (error) {
     console.error("GET /recipes error:", error);
     res.status(500).json(serverError(error));
@@ -251,6 +273,85 @@ router.get("/optimize-images", async (req, res) => {
   } catch (error) {
     console.error("GET /optimize-images error:", error);
     res.status(500).json(serverError(error));
+  }
+});
+
+// DELETE recipe
+router.delete("/recipes/:id", async (req, res) => {
+  console.log('DELETE request for:', req.params.id); // Debug log
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      console.log('Invalid ID format:', req.params.id); // Debug log
+      return res.status(400).json({ 
+        success: false,
+        error: "Invalid recipe ID format" 
+      });
+    }
+
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) {
+      return res.status(404).json({ 
+        success: false,
+        error: "Recipe not found" 
+      });
+    }
+
+    // Store image paths before deletion
+    const imagePaths = [];
+    if (recipe.image && !recipe.image.startsWith('http')) {
+      imagePaths.push(path.join(__dirname, '..', recipe.image));
+    }
+    if (recipe.imageOptimized && !recipe.imageOptimized.startsWith('http')) {
+      imagePaths.push(path.join(__dirname, '..', recipe.imageOptimized));
+    }
+
+    // Delete from database
+    const deletedRecipe = await Recipe.findByIdAndDelete(req.params.id);
+    if (!deletedRecipe) {
+      return res.status(404).json({ 
+        success: false,
+        error: "Recipe deletion failed" 
+      });
+    }
+
+    // Delete associated image files
+    const deletePromises = imagePaths.map(imagePath => {
+      return new Promise((resolve) => {
+        fs.access(imagePath, fs.constants.F_OK, (err) => {
+          if (err) {
+            console.log(`Image not found: ${imagePath}`);
+            return resolve();
+          }
+          fs.unlink(imagePath, (err) => {
+            if (err) {
+              console.error(`Error deleting image file ${imagePath}:`, err);
+              return resolve();
+            }
+            console.log(`Successfully deleted image: ${imagePath}`);
+            resolve();
+          });
+        });
+      });
+    });
+
+    await Promise.all(deletePromises);
+
+    res.json({ 
+      success: true, 
+      message: "Recipe and associated images deleted successfully",
+      deletedRecipe
+    });
+
+  } catch (error) {
+    console.error(`DELETE /recipes/${req.params.id} error:`, error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      ...(process.env.NODE_ENV === 'development' && {
+        details: error.message,
+        stack: error.stack
+      })
+    });
   }
 });
 
