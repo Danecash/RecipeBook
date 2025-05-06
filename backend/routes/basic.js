@@ -1,14 +1,17 @@
-//backend/routes/basic.js
+// backend/routes/basic.js
 
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 
-
+const { protect } = require('../middlewares/auth');
 const upload = require("../utils/upload");
 const validateRecipeData = require("../middlewares/validateRecipe");
 const { formatRecipeImage, serverError } = require("../utils/helpers");
 const Recipe = require("../models/recipe");
+const User = require('../models/user');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const fs = require('fs');
 const path = require('path');
@@ -116,35 +119,6 @@ router.get("/category/:category", async (req, res) => {
   }
 });
 
-// backend/routes/basic.js
-// Update the category endpoint:
-router.get("/category/:category", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 12;
-    const skip = (page - 1) * limit;
-
-    const [recipes, total] = await Promise.all([
-      Recipe.find({ category: { $regex: req.params.category, $options: "i" } })
-        .skip(skip)
-        .limit(limit),
-      Recipe.countDocuments({ category: { $regex: req.params.category, $options: "i" } })
-    ]);
-
-    res.json({
-      data: recipes,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(total / limit),
-        totalItems: total,
-        itemsPerPage: limit
-      }
-    });
-  } catch (error) {
-    res.status(500).json(serverError(error));
-  }
-});
-
 // CREATE recipe
 router.post("/recipes", upload.single('image'), validateRecipeData, async (req, res) => {
   try {
@@ -177,17 +151,13 @@ router.post("/recipes", upload.single('image'), validateRecipeData, async (req, 
   }
 });
 
-// backend/routes/basic.js
-// Add these routes:
-
 // Toggle favorite
-// Update the favorite route to use authenticated user
-router.post('/recipes/:id/favorite', async (req, res) => {
+router.post('/recipes/:id/favorite', protect, async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id);
     if (!recipe) return res.status(404).json({ error: "Recipe not found" });
 
-    const userId = req.user._id; // From authentication middleware
+    const userId = req.user._id;
     const index = recipe.favorites.indexOf(userId);
 
     if (index === -1) {
@@ -205,15 +175,14 @@ router.post('/recipes/:id/favorite', async (req, res) => {
       isFavorited: index === -1
     });
   } catch (error) {
-    res.status(500).json(serverError(error));
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Get favorites route (you already have this, just verify)
-router.get('/favorites', async (req, res) => {
+// Get favorites
+router.get('/favorites', protect, async (req, res) => {
   try {
-    const userId = req.user._id; // From authentication middleware
-    const recipes = await Recipe.find({ favorites: userId });
+    const recipes = await Recipe.find({ favorites: req.user._id });
     res.json(recipes);
   } catch (error) {
     res.status(500).json(serverError(error));
@@ -281,10 +250,10 @@ router.get("/optimize-images", async (req, res) => {
 
 // DELETE recipe
 router.delete("/recipes/:id", async (req, res) => {
-  console.log('DELETE request for:', req.params.id); // Debug log
+  console.log('DELETE request for:', req.params.id);
   try {
     if (!ObjectId.isValid(req.params.id)) {
-      console.log('Invalid ID format:', req.params.id); // Debug log
+      console.log('Invalid ID format:', req.params.id);
       return res.status(400).json({ 
         success: false,
         error: "Invalid recipe ID format" 
@@ -357,106 +326,6 @@ router.delete("/recipes/:id", async (req, res) => {
     });
   }
 });
-
-// Register
-router.post('/register', async (req, res) => {
-  try {
-    const { email, password, name } = req.body;
-
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: "Email already in use" });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const user = new User({
-      name,
-      email,
-      password: hashedPassword
-    });
-
-    await user.save();
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
-
-    res.status(201).json({
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email
-      },
-      token
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Login
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ error: "Invalid credentials" });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
-    }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
-
-    res.json({
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email
-      },
-      token
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Get current user (protected route)
-router.get('/me', async (req, res) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ error: "Not authorized" });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 
 module.exports = router;
 

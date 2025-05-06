@@ -1,74 +1,96 @@
 // backend/routes/auth.js
+
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-// Register
+// @route    POST /api/auth/register
+// @desc     Register a new user
 router.post('/register', async (req, res) => {
-  try {
-    const { email, password, name } = req.body;
+  const { name, email, password } = req.body;
 
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: "All fields are required" });
+  try {
+    // Validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Please enter all fields' });
     }
 
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: "Email already in use" });
+      return res.status(400).json({ error: 'User already exists' });
     }
 
+    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = new User({
+    // Create user
+    const newUser = new User({
       name,
       email,
       password: hashedPassword
     });
 
-    await user.save();
+    const savedUser = await newUser.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
+    // Create token
+    const token = jwt.sign(
+      { id: savedUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
     res.status(201).json({
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email
+        id: savedUser._id,
+        name: savedUser.name,
+        email: savedUser.email
       },
       token
     });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Login
+// @route    POST /api/auth/login
+// @desc     Login user
 router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
+  try {
+    // Validation
     if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
+      return res.status(400).json({ error: 'Please enter all fields' });
     }
 
+    // Check for user
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      return res.status(400).json({ error: 'Invalid credentials' });
     }
 
+    // Validate password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
+    // Create token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
     res.json({
       user: {
@@ -78,29 +100,33 @@ router.post('/login', async (req, res) => {
       },
       token
     });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Get current user (protected route)
-router.get('/me', async (req, res) => {
+// @route    GET /api/auth/user
+// @desc     Get user data
+router.get('/user', async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-      return res.status(401).json({ error: "Not authorized" });
+      return res.status(401).json({ error: 'Not authorized' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: 'User not found' });
     }
 
     res.json(user);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
