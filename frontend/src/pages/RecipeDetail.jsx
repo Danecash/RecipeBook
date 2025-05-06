@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getRecipeById, deleteRecipe } from '../services/api';
+import FavoriteButton from '../components/FavoriteButton';
+import { useAuth } from '../context/AuthContext';
 
 const RecipeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imageUrl, setImageUrl] = useState('');
@@ -42,22 +45,28 @@ const RecipeDetail = () => {
   }, [id, navigate]);
 
   const handleDelete = async () => {
-    if (!window.confirm('Delete this recipe?')) return;
-  
+    if (!window.confirm('Are you sure you want to permanently delete this recipe?')) {
+      return;
+    }
+
     try {
       setIsDeleting(true);
-      console.log('Deleting recipe ID:', id);
-      
+      setError('');
       const response = await deleteRecipe(id);
-      console.log('Delete response:', response);
       
-      navigate('/', { 
-        state: { message: 'Recipe deleted successfully' }
-      });
+      if (response.data.success) {
+        navigate('/', { 
+          state: { 
+            message: response.data.message || 'Recipe deleted successfully',
+            deletedRecipe: response.data.deletedRecipe 
+          } 
+        });
+      } else {
+        setError(response.data.error || 'Failed to delete recipe');
+      }
     } catch (err) {
-      console.error('Full error:', err);
-      console.error('Response data:', err.response?.data);
-      setError(err.response?.data?.error || 'Delete failed');
+      console.error('Error deleting recipe:', err);
+      setError(err.response?.data?.error || err.message || 'Failed to delete recipe');
     } finally {
       setIsDeleting(false);
     }
@@ -73,6 +82,11 @@ const RecipeDetail = () => {
       </button>
 
       <div className="recipe-actions">
+        <FavoriteButton 
+          recipeId={id}
+          initialCount={recipe.favoriteCount || 0}
+          isInitiallyFavorited={recipe.favorites?.includes(user?._id) || false}
+        />
         <button 
           onClick={handleDelete}
           disabled={isDeleting}
@@ -83,10 +97,11 @@ const RecipeDetail = () => {
         {error && <div className="error-message">{error}</div>}
       </div>
 
-      {/* Rest of your recipe detail JSX remains the same */}
       <div className="recipe-header">
         <h1>{recipe.name}</h1>
-        <span className="category-badge">{recipe.category}</span>
+        <span className={`category-badge ${recipe.category.toLowerCase()}`}>
+          {recipe.category}
+        </span>
       </div>
 
       <div className="image-container">

@@ -1,6 +1,4 @@
 // backend/models/recipe.js
-// Recipe model with enhanced validation, pagination, and image handling
-
 const mongoose = require("mongoose");
 const mongoosePaginate = require('mongoose-paginate-v2');
 const path = require('path');
@@ -9,18 +7,22 @@ const recipeSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Recipe name is required"],
-    trim: true
+    trim: true,
+    maxlength: [100, "Recipe name cannot exceed 100 characters"]
   },
   category: {
     type: String,
     required: [true, "Category is required"],
-    enum: ['Appetizer', 'Beverages', 'Desserts', 'Meal']
+    enum: {
+      values: ['Appetizer', 'Beverages', 'Desserts', 'Meal'],
+      message: '{VALUE} is not a valid category'
+    }
   },
   ingredients: {
     type: [String],
     required: [true, "Ingredients are required"],
     validate: {
-      validator: v => v.length > 0 && v.every(i => i.trim().length > 0),
+      validator: v => Array.isArray(v) && v.length > 0 && v.every(i => i.trim().length > 0),
       message: "At least one valid ingredient is required"
     }
   },
@@ -28,7 +30,7 @@ const recipeSchema = new mongoose.Schema({
     type: [String],
     required: [true, "Instructions are required"],
     validate: {
-      validator: v => v.length > 0 && v.every(i => i.trim().length > 0),
+      validator: v => Array.isArray(v) && v.length > 0 && v.every(i => i.trim().length > 0),
       message: "At least one valid instruction is required"
     }
   },
@@ -41,52 +43,92 @@ const recipeSchema = new mongoose.Schema({
     }
   },
   imageOptimized: {
-    type: String
-  },
-  favorite: {
-    type: Boolean,
-    default: false
+    type: String,
+    validate: {
+      validator: function(v) {
+        if (!v) return true; // Optional field
+        return v.startsWith('/backend/uploads/') || v.startsWith('http');
+      },
+      message: "Optimized image path must be in /backend/uploads/ or a valid URL"
+    }
   },
   favorites: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    index: true // Added index for better query performance
   }],
   favoriteCount: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   reviews: [{
     rating: {
       type: Number,
       min: 1,
-      max: 5
+      max: 5,
+      required: true
     },
-    comment: String,
+    comment: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Comment cannot exceed 500 characters"]
+    },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
     date: {
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 }, {
   timestamps: true,
   toJSON: {
+    virtuals: true,
     transform: function(doc, ret) {
       // Add full URL when converting to JSON
       if (ret.image && !ret.image.startsWith('http')) {
-        ret.image = `http://localhost:3000${ret.image}`;
+        ret.image = `${process.env.BASE_URL || 'http://localhost:3000'}${ret.image}`;
       }
       if (ret.imageOptimized && !ret.imageOptimized.startsWith('http')) {
-        ret.imageOptimized = `http://localhost:3000${ret.imageOptimized}`;
+        ret.imageOptimized = `${process.env.BASE_URL || 'http://localhost:3000'}${ret.imageOptimized}`;
       }
+      
+      // Remove sensitive/internal fields
+      delete ret.__v;
+      delete ret._id;
+      ret.id = doc._id.toString();
       return ret;
     }
+  },
+  toObject: {
+    virtuals: true
   }
 });
 
 // Auto-create optimized image path
 recipeSchema.pre('save', function(next) {
-  if (this.isModified('image')) {
-    this.imageOptimized = this.image; // Remove ?w=400... if not using
+  if (this.isModified('image') && !this.imageOptimized) {
+    this.imageOptimized = this.image;
+  }
+  this.updatedAt = Date.now();
+  next();
+});
+
+// Update favorite count when favorites array changes
+recipeSchema.pre('save', function(next) {
+  if (this.isModified('favorites')) {
+    this.favoriteCount = this.favorites.length;
   }
   next();
 });
@@ -96,6 +138,24 @@ recipeSchema.index({
   name: 'text',
   category: 'text',
   ingredients: 'text'
+}, {
+  weights: {
+    name: 5,
+    ingredients: 3,
+    category: 1
+  }
+});
+
+// Index for favorites and sorting
+recipeSchema.index({ favorites: 1 });
+recipeSchema.index({ favoriteCount: -1 });
+recipeSchema.index({ createdAt: -1 });
+
+// Virtual for average rating
+recipeSchema.virtual('averageRating').get(function() {
+  if (!this.reviews || this.reviews.length === 0) return 0;
+  const sum = this.reviews.reduce((acc, review) => acc + review.rating, 0);
+  return (sum / this.reviews.length).toFixed(1);
 });
 
 recipeSchema.plugin(mongoosePaginate);

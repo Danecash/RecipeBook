@@ -3,16 +3,20 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getFavorites } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
+import { useAuth } from '../context/AuthContext';
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        const response = await getFavorites();
-        setFavorites(response.data);
+        if (user) {
+          const response = await getFavorites();
+          setFavorites(response.data);
+        }
       } catch (error) {
         console.error("Error fetching favorites:", error);
       } finally {
@@ -20,7 +24,7 @@ const FavoritesPage = () => {
       }
     };
     fetchFavorites();
-  }, []);
+  }, [user]);
 
   if (loading) return <div className="loading">Loading favorites...</div>;
 

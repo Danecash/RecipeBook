@@ -1,15 +1,21 @@
 // frontend/src/services/api.js
 
 import axios from 'axios';
-export const toggleFavorite = (recipeId) => api.post(`/recipes/${recipeId}/favorite`);
-export const getFavorites = () => api.get('/favorites');
-export const deleteRecipe = (id) => api.delete(`/recipes/${id}`);
+
 
 const api = axios.create({
   baseURL: 'http://localhost:3000/api',
-  timeout: 10000, // 10 second timeout
+  timeout: 10000,
 });
 
+// Add these auth exports at the top
+export const login = (credentials) => api.post('/auth/login', credentials);
+export const register = (userData) => api.post('/auth/register', userData);
+
+// Keep all your existing exports and interceptors below
+export const toggleFavorite = (recipeId) => api.post(`/recipes/${recipeId}/favorite`);
+export const getFavorites = () => api.get('/favorites');
+export const deleteRecipe = (id) => api.delete(`/recipes/${id}`);
 
 // Request interceptor for logging
 api.interceptors.request.use(config => {

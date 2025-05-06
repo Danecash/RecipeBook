@@ -1,16 +1,15 @@
 // frontend/src/context/AuthContext.jsx
-
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import { login as apiLogin, register as apiRegister } from '../services/api';
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Check for existing session
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -19,17 +18,31 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
-    const response = await apiLogin(credentials);
-    setUser(response.data.user);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
-    localStorage.setItem('token', response.data.token);
+    try {
+      setError(null);
+      const response = await apiLogin(credentials);
+      setUser(response.data.user);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('token', response.data.token);
+      return response;
+    } catch (err) {
+      setError(err.response?.data?.error || err.message);
+      throw err;
+    }
   };
 
   const register = async (userData) => {
-    const response = await apiRegister(userData);
-    setUser(response.data.user);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
-    localStorage.setItem('token', response.data.token);
+    try {
+      setError(null);
+      const response = await apiRegister(userData);
+      setUser(response.data.user);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('token', response.data.token);
+      return response;
+    } catch (err) {
+      setError(err.response?.data?.error || err.message);
+      throw err;
+    }
   };
 
   const logout = () => {
@@ -39,8 +52,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      register, 
+      logout, 
+      loading,
+      error
+    }}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+// Add this custom hook
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

@@ -1,16 +1,12 @@
 //backend/config/db.js
-// MongoDB connection configuration with enhanced error handling and logging
-
 const mongoose = require('mongoose');
 
-// Connection with enhanced options and debugging
 const connectDB = async () => {
   try {
     if (!process.env.MONGO_URI) {
       throw new Error("MongoDB connection URI is missing in .env file");
     }
 
-    // Mask password in logs
     const maskedURI = process.env.MONGO_URI.replace(
       /(mongodb\+srv:\/\/[^:]+:)([^@]+)/,
       '$1********'
@@ -46,4 +42,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB
+module.exports = connectDB;

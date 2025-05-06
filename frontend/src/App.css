@@ -541,3 +541,34 @@
   padding: 0.5rem;
   border-radius: 4px;
 }
+
+/* Add to your existing CSS */
+.favorite-btn {
+  background: none;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+}
+
+.favorite-btn.favorited {
+  background-color: var(--primary);
+  color: white;
+}
+
+.favorites-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
