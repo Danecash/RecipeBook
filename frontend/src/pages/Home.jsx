@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom';
 import { getRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
+import CategoryButtons from '../components/CategoryButtons';
 
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 8; // Items per page
+  const limit = 8;
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -41,6 +42,9 @@ const Home = () => {
         <p>Discover delicious recipes for every occasion</p>
         <Link to="/add-recipe" className="cta-button">Add Your Recipe</Link>
       </section>
+
+      {/* Add Category Buttons Here */}
+      <CategoryButtons />
 
       <section className="featured-recipes">
         <h2>All Recipes</h2>

@@ -1,5 +1,4 @@
 // frontend/src/pages/CategoryPage.jsx
-
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getRecipesByCategory } from '../services/api';
@@ -12,7 +11,7 @@ const CategoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 12; // Items per page
+  const limit = 12;
 
   useEffect(() => {
     const fetchRecipes = async () => {

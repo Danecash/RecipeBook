@@ -1,8 +1,12 @@
 // frontend/src/context/AuthContext.jsx
 import { createContext, useState, useEffect, useContext } from 'react';
-import { login as apiLogin, register as apiRegister } from '../services/api';
+import { 
+  login as apiLogin, 
+  register as apiRegister,
+  getCurrentUser
+} from '../services/api';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -10,24 +14,40 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const response = await getCurrentUser();
+          if (response.data) {
+            setUser(response.data);
+          } else {
+            localStorage.removeItem('token');
+          }
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        localStorage.removeItem('token');
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
   }, []);
 
   const login = async (credentials) => {
     try {
       setError(null);
       const response = await apiLogin(credentials);
-      setUser(response.data.user);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem('token', response.data.token);
+      setUser(response.data.user);
       return response;
-    } catch (err) {
-      setError(err.response?.data?.error || err.message);
-      throw err;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 
+                         error.response?.data?.message || 
+                         'Login failed. Please try again.';
+      setError(errorMessage);
+      throw error;
     }
   };
 
@@ -35,20 +55,21 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const response = await apiRegister(userData);
-      setUser(response.data.user);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
       localStorage.setItem('token', response.data.token);
+      setUser(response.data.user);
       return response;
-    } catch (err) {
-      setError(err.response?.data?.error || err.message);
-      throw err;
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 
+                         error.response?.data?.message || 
+                         'Registration failed. Please try again.';
+      setError(errorMessage);
+      throw error;
     }
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
     localStorage.removeItem('token');
+    setUser(null);
   };
 
   return (
@@ -58,14 +79,14 @@ export const AuthProvider = ({ children }) => {
       register, 
       logout, 
       loading,
-      error
+      error,
+      setError
     }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Add this custom hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

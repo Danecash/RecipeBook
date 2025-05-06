@@ -1,4 +1,5 @@
 // frontend/src/components/FavoriteButton.jsx
+
 import { useState, useEffect } from 'react';
 import { toggleFavorite } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -7,11 +8,6 @@ const FavoriteButton = ({ recipeId, initialCount, isInitiallyFavorited }) => {
   const [isFavorited, setIsFavorited] = useState(isInitiallyFavorited);
   const [favoriteCount, setFavoriteCount] = useState(initialCount);
   const { user } = useAuth();
-
-  useEffect(() => {
-    setIsFavorited(isInitiallyFavorited);
-    setFavoriteCount(initialCount);
-  }, [isInitiallyFavorited, initialCount]);
 
   const handleFavorite = async () => {
     if (!user) {
@@ -32,7 +28,6 @@ const FavoriteButton = ({ recipeId, initialCount, isInitiallyFavorited }) => {
     <button
       onClick={handleFavorite}
       className={`favorite-btn ${isFavorited ? 'favorited' : ''}`}
-      aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
     >
       {isFavorited ? '❤️' : '♡'} {favoriteCount}
     </button>
