@@ -76,17 +76,18 @@ const AddRecipe = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+  
     setIsSubmitting(true);
     try {
       await addRecipe(formData);
+      alert('Recipe added successfully!');
       navigate('/');
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {
       setIsSubmitting(false);
     }
-  };
+  };  
 
   return (
     <div className="add-recipe-page">
@@ -108,7 +109,7 @@ const AddRecipe = () => {
         </div>
 
         <div className="form-group">
-          <label>Category</label>
+          <label>Category</label><h1></h1>
           <select
             name="category"
             value={formData.category}
