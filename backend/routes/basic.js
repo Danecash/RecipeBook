@@ -26,9 +26,10 @@ router.get("/recipes", async (req, res) => {
 
     const [recipes, total] = await Promise.all([
       Recipe.find()
-        .select('+imageOptimized')
+        .sort({ createdAt: -1 }) // Add sorting
         .skip(skip)
         .limit(limit)
+        .select('+imageOptimized')
         .lean()
         .transform(docs => docs.map(formatRecipeImage)),
       Recipe.countDocuments()
@@ -87,21 +88,24 @@ router.get("/search/:query", async (req, res) => {
   }
 });
 
-// GET recipes by category
+// Update the GET recipes by category route
 router.get("/category/:category", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
 
+    // Exact match for category (case insensitive)
+    const category = new RegExp(`^${req.params.category}$`, 'i');
+
     const [recipes, total] = await Promise.all([
-      Recipe.find({ category: { $regex: req.params.category, $options: "i" } })
-        .select('+imageOptimized')
+      Recipe.find({ category })
+        .sort({ _id: 1 }) // Sort by _id for consistent pagination
         .skip(skip)
         .limit(limit)
-        .lean()
-        .transform(docs => docs.map(formatRecipeImage)),
-      Recipe.countDocuments({ category: { $regex: req.params.category, $options: "i" } })
+        .select('+imageOptimized')
+        .lean(),
+      Recipe.countDocuments({ category })
     ]);
 
     res.json({
@@ -118,6 +122,7 @@ router.get("/category/:category", async (req, res) => {
     res.status(500).json(serverError(error));
   }
 });
+
 
 // CREATE recipe
 router.post("/recipes", upload.single('image'), validateRecipeData, async (req, res) => {

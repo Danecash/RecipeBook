@@ -17,8 +17,20 @@ export const getFavorites = () => api.get('/favorites');
 export const deleteRecipe = (id) => api.delete(`/recipes/${id}`);
 export const getRecipes = (page = 1, limit = 8) => api.get('/recipes', { params: { page, limit } });
 export const getRecipeById = (id) => api.get(`/recipes/${id}`);
-export const getRecipesByCategory = (category) => api.get(`/category/${category}`);
-export const searchRecipes = (query) => api.get(`/search/${query}`);
+
+// Updated to support pagination
+export const getRecipesByCategory = (category, page = 1, limit = 12, options = {}) => {
+  return api.get(`/category/${encodeURIComponent(category)}`, {
+    params: { page, limit },
+    ...options
+  });
+};
+
+export const searchRecipes = (query, page = 1, limit = 12) => {
+  return api.get(`/search/${encodeURIComponent(query)}`, {
+    params: { page, limit }
+  });
+};
 
 export const addRecipe = (recipeData) => {
   const formData = new FormData();
@@ -52,7 +64,24 @@ api.interceptors.request.use(config => {
 
 // Response interceptor
 api.interceptors.response.use(
-  response => response,
+  response => {
+    // Add pagination data to response if not present
+    if (response.data && Array.isArray(response.data)) {
+      return {
+        ...response,
+        data: {
+          data: response.data,
+          pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: response.data.length,
+            itemsPerPage: response.data.length
+          }
+        }
+      };
+    }
+    return response;
+  },
   error => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');

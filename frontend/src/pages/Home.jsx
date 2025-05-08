@@ -11,6 +11,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const limit = 8;
 
   useEffect(() => {
@@ -20,6 +21,7 @@ const Home = () => {
         const response = await getRecipes(currentPage, limit);
         setRecipes(response.data.data);
         setTotalPages(response.data.pagination.totalPages);
+        setTotalItems(response.data.pagination.totalItems);
       } catch (error) {
         console.error('Error fetching recipes:', error);
       } finally {
@@ -29,8 +31,9 @@ const Home = () => {
     fetchRecipes();
   }, [currentPage]);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) return <div className="loading">Loading recipes...</div>;
@@ -43,7 +46,6 @@ const Home = () => {
         <Link to="/add-recipe" className="cta-button">Add Your Recipe</Link>
       </section>
 
-      {/* Add Category Buttons Here */}
       <CategoryButtons />
 
       <section className="featured-recipes">
@@ -57,6 +59,8 @@ const Home = () => {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
+          totalItems={totalItems}
+          itemsPerPage={limit}
           onPageChange={handlePageChange}
         />
       </section>
