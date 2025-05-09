@@ -12,14 +12,23 @@ export const login = (credentials) => api.post('/auth/login', credentials);
 export const register = (userData) => api.post('/auth/register', userData);
 export const getCurrentUser = () => api.get('/auth/user');
 
-// Recipe endpoints
-export const toggleFavorite = (recipeId) => api.post(`/recipes/${recipeId}/favorite`);
-
 // Updated getFavorites to maintain array response
-export const getFavorites = (page = 1, limit = 8) => {
-  return api.get('/favorites', {
-    params: { page, limit }
-  });
+export const getFavorites = async (page = 1, limit = 8) => {
+  try {
+    const response = await api.get('/favorites', {
+      params: { page, limit }
+    });
+    console.log('Favorites API Response:', response.data); // Debug log
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching favorites:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Recipe endpoints
+export const toggleFavorite = (recipeId) => {
+  return api.post(`/recipes/${recipeId}/favorite`);
 };
 
 export const deleteRecipe = (id) => api.delete(`/recipes/${id}`);

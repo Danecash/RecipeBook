@@ -156,65 +156,8 @@ router.post("/recipes", upload.single('image'), validateRecipeData, async (req, 
   }
 });
 
-// Toggle favorite
-router.post('/recipes/:id/favorite', protect, async (req, res) => {
-  try {
-    const recipe = await Recipe.findById(req.params.id);
-    if (!recipe) return res.status(404).json({ error: "Recipe not found" });
-
-    const userId = req.user._id;
-    const index = recipe.favorites.indexOf(userId);
-
-    if (index === -1) {
-      recipe.favorites.push(userId);
-      recipe.favoriteCount += 1;
-    } else {
-      recipe.favorites.splice(index, 1);
-      recipe.favoriteCount -= 1;
-    }
-
-    await recipe.save();
-    res.json({ 
-      success: true, 
-      favoriteCount: recipe.favoriteCount,
-      isFavorited: index === -1
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Get favorites
-router.get('/favorites', protect, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id)
-      .populate({
-        path: 'favorites',
-        options: {
-          limit: parseInt(req.query.limit) || 8,
-          skip: (parseInt(req.query.page) - 1) * parseInt(req.query.limit) || 0,
-          sort: { createdAt: -1 }
-        }
-      });
-
-    const total = await User.findById(req.user._id).then(u => u.favorites.length);
-
-    res.json({
-      data: user.favorites,
-      pagination: {
-        currentPage: parseInt(req.query.page) || 1,
-        totalPages: Math.ceil(total / (parseInt(req.query.limit) || 8)),
-        totalItems: total,
-        itemsPerPage: parseInt(req.query.limit) || 8
-      }
-    });
-  } catch (error) {
-    console.error('GET /favorites error:', error);
-    res.status(500).json(serverError(error));
-  }
-});
-
 // UPDATE recipe
+
 router.put("/recipes/:id", upload.single('image'), validateRecipeData, async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
@@ -393,6 +336,93 @@ router.post('/recipes/:id/rate', protect, async (req, res) => {
   } catch (error) {
     console.error(`POST /recipes/${req.params.id}/rate error:`, error);
     res.status(500).json(serverError(error));
+  }
+});
+
+// Toggle favorite
+router.post('/recipes/:id/favorite', protect, async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) return res.status(404).json({ error: "Recipe not found" });
+
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    
+    const recipeIndex = recipe.favorites.indexOf(userId);
+    const userIndex = user.favorites.indexOf(recipe._id);
+
+    if (recipeIndex === -1) {
+      // Add to favorites
+      recipe.favorites.push(userId);
+      recipe.favoriteCount += 1;
+      user.favorites.push(recipe._id);
+    } else {
+      // Remove from favorites
+      recipe.favorites.splice(recipeIndex, 1);
+      recipe.favoriteCount -= 1;
+      user.favorites.splice(userIndex, 1);
+    }
+
+    await Promise.all([recipe.save(), user.save()]);
+    
+    res.json({ 
+      success: true, 
+      favoriteCount: recipe.favoriteCount,
+      isFavorited: recipeIndex === -1
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get favorites
+router.get('/favorites', protect, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10; // Changed to 10 recipes per page
+    const skip = (page - 1) * limit;
+
+    // First get the user with populated favorites (limited to current page)
+    const user = await User.findById(req.user._id)
+      .populate({
+        path: 'favorites',
+        options: {
+          skip,
+          limit,
+          sort: { createdAt: -1 }
+        }
+      })
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Then count total favorites (using aggregation for better performance)
+    const totalCount = await User.aggregate([
+      { $match: { _id: user._id } },
+      { $project: { count: { $size: "$favorites" } } }
+    ]);
+
+    const total = totalCount[0]?.count || 0;
+
+    res.json({
+      success: true,
+      data: user.favorites || [],
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: limit
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching favorites:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch favorites",
+      details: error.message
+    });
   }
 });
 
