@@ -187,9 +187,19 @@ router.post('/recipes/:id/favorite', protect, async (req, res) => {
 // Get favorites
 router.get('/favorites', protect, async (req, res) => {
   try {
-    const recipes = await Recipe.find({ favorites: req.user._id });
-    res.json(recipes);
+    const user = await User.findById(req.user.id).populate({
+      path: 'favorites',
+      options: { sort: { createdAt: -1 } } // Sort favorites by creation date
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Return as array to maintain compatibility
+    res.json(user.favorites);
   } catch (error) {
+    console.error("Error fetching favorites:", error);
     res.status(500).json(serverError(error));
   }
 });
@@ -329,6 +339,47 @@ router.delete("/recipes/:id", async (req, res) => {
         stack: error.stack
       })
     });
+  }
+});
+
+// Add this new route for ratings
+router.post("/recipes/:id/rate", protect, async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const recipe = await Recipe.findById(req.params.id);
+    
+    if (!recipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    // Check if user already rated this recipe
+    const existingReview = recipe.reviews.find(
+      review => review.author.toString() === req.user._id.toString()
+    );
+
+    if (existingReview) {
+      // Update existing review
+      existingReview.rating = rating;
+      existingReview.comment = comment || existingReview.comment;
+    } else {
+      // Add new review
+      recipe.reviews.push({
+        rating,
+        comment,
+        author: req.user._id
+      });
+    }
+
+    await recipe.save();
+    
+    res.json({
+      success: true,
+      averageRating: recipe.averageRating,
+      reviewCount: recipe.reviews.length
+    });
+  } catch (error) {
+    console.error(`POST /recipes/${req.params.id}/rate error:`, error);
+    res.status(500).json(serverError(error));
   }
 });
 

@@ -8,8 +8,9 @@ const SearchBar = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      navigate(`/search/${query}`);
+    const trimmedQuery = query.trim();
+    if (trimmedQuery) {
+      navigate(`/search/${encodeURIComponent(trimmedQuery)}`);
       setQuery('');
     }
   };
@@ -21,6 +22,8 @@ const SearchBar = () => {
         placeholder="Search recipes..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        required
+        minLength={2}
       />
       <button type="submit">Search</button>
     </form>

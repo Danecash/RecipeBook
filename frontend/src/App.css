@@ -1040,3 +1040,129 @@
 .pagination-container {
   margin: 3rem 0;
 }
+
+/* Star Rating */
+.star-rating {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.star-rating .star {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0;
+}
+
+.star-rating .star.active {
+  color: #FFD700;
+}
+
+.star-rating .star:disabled {
+  cursor: default;
+}
+
+/* Rating Section */
+.rating-section {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.review-form textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Recipe Form */
+.recipe-form {
+  margin-top: 1.5rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cancel-btn {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* Card Actions */
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.remove-favorite {
+  background: none;
+  border: none;
+  color: #ef476f;
+  cursor: pointer;
+}
+
+.rating-badge {
+  display: inline-block;
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Star Rating */
+.star-rating {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.star-rating .star {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.star-rating .star.active {
+  color: #FFD700;
+}
+
+.star-rating .star:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* Rating Section */
+.rating-section {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.review-form textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}

@@ -1,4 +1,5 @@
-// frontend/src/services/api.js
+// frontend/src/App.jsx
+
 import axios from 'axios';
 
 const api = axios.create({
@@ -13,7 +14,19 @@ export const getCurrentUser = () => api.get('/auth/user');
 
 // Recipe endpoints
 export const toggleFavorite = (recipeId) => api.post(`/recipes/${recipeId}/favorite`);
-export const getFavorites = () => api.get('/favorites');
+
+// Updated getFavorites to maintain array response
+export const getFavorites = () => api.get('/favorites')
+  .then(response => {
+    if (response.data && response.data.data) {
+      return {
+        ...response,
+        data: response.data.data
+      };
+    }
+    return response;
+  });
+
 export const deleteRecipe = (id) => api.delete(`/recipes/${id}`);
 export const getRecipes = (page = 1, limit = 8) => api.get('/recipes', { params: { page, limit } });
 export const getRecipeById = (id) => api.get(`/recipes/${id}`);
@@ -53,7 +66,7 @@ export const addRecipe = (recipeData) => {
   }
 };
 
-// Request interceptor
+// Request interceptor for auth token
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -62,10 +75,9 @@ api.interceptors.request.use(config => {
   return config;
 }, error => Promise.reject(error));
 
-// Response interceptor
+// Response interceptor with pagination fallback
 api.interceptors.response.use(
   response => {
-    // Add pagination data to response if not present
     if (response.data && Array.isArray(response.data)) {
       return {
         ...response,
@@ -89,3 +101,24 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const rateRecipe = (recipeId, ratingData) => 
+  api.post(`/recipes/${recipeId}/rate`, ratingData);
+
+export const updateRecipe = (recipeId, recipeData) => {
+  const formData = new FormData();
+  Object.keys(recipeData).forEach(key => {
+    if (key === 'ingredients' || key === 'instructions') {
+      formData.append(key, JSON.stringify(recipeData[key]));
+    } else if (key === 'image' && recipeData[key] instanceof File) {
+      formData.append('image', recipeData[key]);
+    } else if (recipeData[key] !== null && recipeData[key] !== undefined) {
+      formData.append(key, recipeData[key]);
+    }
+  });
+  return api.put(`/recipes/${recipeId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export default api;
