@@ -16,16 +16,11 @@ export const getCurrentUser = () => api.get('/auth/user');
 export const toggleFavorite = (recipeId) => api.post(`/recipes/${recipeId}/favorite`);
 
 // Updated getFavorites to maintain array response
-export const getFavorites = () => api.get('/favorites')
-  .then(response => {
-    if (response.data && response.data.data) {
-      return {
-        ...response,
-        data: response.data.data
-      };
-    }
-    return response;
+export const getFavorites = (page = 1, limit = 8) => {
+  return api.get('/favorites', {
+    params: { page, limit }
   });
+};
 
 export const deleteRecipe = (id) => api.delete(`/recipes/${id}`);
 export const getRecipes = (page = 1, limit = 8) => api.get('/recipes', { params: { page, limit } });
@@ -102,8 +97,9 @@ api.interceptors.response.use(
   }
 );
 
-export const rateRecipe = (recipeId, ratingData) => 
-  api.post(`/recipes/${recipeId}/rate`, ratingData);
+export const rateRecipe = (recipeId, { rating, comment }) => {
+  return api.post(`/recipes/${recipeId}/rate`, { rating, comment });
+};
 
 export const updateRecipe = (recipeId, recipeData) => {
   const formData = new FormData();
@@ -120,5 +116,6 @@ export const updateRecipe = (recipeId, recipeData) => {
     headers: { 'Content-Type': 'multipart/form-data' }
   });
 };
+
 
 export default api;

@@ -21,12 +21,12 @@ const RecipeDetail = () => {
   const { user } = useAuth();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
-  
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [userReview, setUserReview] = useState('');
+  const [isSavingReview, setIsSavingReview] = useState(false);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -37,7 +37,6 @@ const RecipeDetail = () => {
         
         setRecipe(response.data);
         
-        // Check if user has already rated this recipe
         if (user) {
           const userReview = response.data.reviews?.find(
             r => r.author._id === user._id
@@ -48,7 +47,6 @@ const RecipeDetail = () => {
           }
         }
       } catch (error) {
-
         setError(error.message);
         navigate('/favorites', { state: { error: 'Recipe not found' } });
       } finally {
@@ -69,10 +67,10 @@ const RecipeDetail = () => {
       navigate('/');
     } catch (error) {
       setError(error.message);
+      toast.error('Failed to delete recipe');
     } finally {
       setIsDeleting(false);
     }
-
   };
 
   const handleRate = async (rating) => {
@@ -82,6 +80,7 @@ const RecipeDetail = () => {
     }
 
     try {
+      setIsSavingReview(true);
       setUserRating(rating);
       const response = await rateRecipe(id, { 
         rating, 
@@ -92,11 +91,21 @@ const RecipeDetail = () => {
         reviews: response.data.reviews,
         averageRating: response.data.averageRating
       }));
-      toast.success('Rating submitted!');
+      toast.success('Rating saved!');
     } catch (error) {
       console.error('Rating error:', error);
-      toast.error('Failed to submit rating');
+      toast.error('Failed to save rating');
+    } finally {
+      setIsSavingReview(false);
     }
+  };
+
+  const handleSaveReview = async () => {
+    if (!userRating) {
+      toast.error('Please select a rating');
+      return;
+    }
+    await handleRate(userRating);
   };
 
   const handleUpdate = async (formData) => {
@@ -109,6 +118,12 @@ const RecipeDetail = () => {
       console.error('Update error:', error);
       toast.error('Failed to update recipe');
     }
+  };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '/placeholder-recipe.jpg';
+    if (imagePath.startsWith('http')) return imagePath;
+    return `http://localhost:3000${imagePath}`;
   };
 
   if (loading) return <div className="loading">Loading recipe...</div>;
@@ -145,7 +160,6 @@ const RecipeDetail = () => {
             </button>
           </>
         )}
-
       </div>
 
       {isEditing ? (
@@ -165,7 +179,7 @@ const RecipeDetail = () => {
 
           <div className="image-container">
             <img
-              src={recipe.imageOptimized || recipe.image}
+              src={getImageUrl(recipe.imageOptimized || recipe.image)}
               alt={recipe.name}
               onError={(e) => {
                 e.target.src = '/placeholder-recipe.jpg';
@@ -188,6 +202,13 @@ const RecipeDetail = () => {
                   onChange={(e) => setUserReview(e.target.value)}
                   placeholder="Leave a review (optional)"
                 />
+                <button
+                  onClick={handleSaveReview}
+                  disabled={isSavingReview}
+                  className="save-review-btn"
+                >
+                  {isSavingReview ? 'Saving...' : 'Save Review'}
+                </button>
               </div>
             )}
           </div>

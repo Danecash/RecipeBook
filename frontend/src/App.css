@@ -1166,3 +1166,49 @@
   border-radius: 4px;
   resize: vertical;
 }
+
+/* Add these to your CSS file */
+.image-container {
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.detail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.review-form {
+  margin-top: 1rem;
+}
+
+.save-review-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  cursor: pointer;
+}
+
+.save-review-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.search-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.favorites-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}

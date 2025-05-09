@@ -23,12 +23,13 @@ const FavoritesPage = () => {
         setLoading(true);
         if (user) {
           const response = await getFavorites(currentPage, limit);
-          setFavorites(response.data.data);
-          setTotalPages(response.data.pagination.totalPages);
-          setTotalItems(response.data.pagination.totalItems);
+          setFavorites(response.data.data || []);
+          setTotalPages(response.data.pagination?.totalPages || 1);
+          setTotalItems(response.data.pagination?.totalItems || 0);
         }
       } catch (error) {
         setError('Failed to load favorites');
+        toast.error('Failed to load favorites');
       } finally {
         setLoading(false);
       }
@@ -36,7 +37,7 @@ const FavoritesPage = () => {
     fetchFavorites();
   }, [user, currentPage]);
 
-  const handleDelete = async (recipeId) => {
+  const handleRemoveFavorite = async (recipeId) => {
     if (!window.confirm('Remove from favorites?')) return;
     
     try {
@@ -69,7 +70,7 @@ const FavoritesPage = () => {
               <RecipeCard 
                 key={recipe._id} 
                 recipe={recipe}
-                onDelete={() => handleDelete(recipe._id)}
+                onDelete={() => handleRemoveFavorite(recipe._id)}
               />
             ))}
           </div>
