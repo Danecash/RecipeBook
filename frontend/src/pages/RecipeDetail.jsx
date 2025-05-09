@@ -28,34 +28,34 @@ const RecipeDetail = () => {
   const [userReview, setUserReview] = useState('');
   const [isSavingReview, setIsSavingReview] = useState(false);
 
-  useEffect(() => {
-    const fetchRecipe = async () => {
-      try {
-        setLoading(true);
-        const response = await getRecipeById(id);
-        if (!response.data) throw new Error('Recipe not found');
-        
-        setRecipe(response.data);
-        
-        if (user) {
-          const userReview = response.data.reviews?.find(
-            r => r.author._id === user._id
-          );
-          if (userReview) {
-            setUserRating(userReview.rating);
-            setUserReview(userReview.comment || '');
-          }
+  const fetchRecipe = async () => {
+    try {
+      setLoading(true);
+      const response = await getRecipeById(id);
+      if (!response.data) throw new Error('Recipe not found');
+      
+      setRecipe(response.data);
+      
+      if (user) {
+        const userReview = response.data.reviews?.find(
+          r => r.author._id === user._id
+        );
+        if (userReview) {
+          setUserRating(userReview.rating);
+          setUserReview(userReview.comment || '');
         }
-      } catch (error) {
-        setError(error.message);
-        navigate('/favorites', { state: { error: 'Recipe not found' } });
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      setError(error.message);
+      toast.error('Failed to load recipe');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchRecipe();
-  }, [id, navigate, user]);
+  }, [id, user]);
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this recipe?')) return;
@@ -73,39 +73,32 @@ const RecipeDetail = () => {
     }
   };
 
-  const handleRate = async (rating) => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      setIsSavingReview(true);
-      setUserRating(rating);
-      const response = await rateRecipe(id, { 
-        rating, 
-        comment: userReview 
-      });
-      setRecipe(prev => ({
-        ...prev,
-        reviews: response.data.reviews,
-        averageRating: response.data.averageRating
-      }));
-      toast.success('Rating saved!');
-    } catch (error) {
-      console.error('Rating error:', error);
-      toast.error('Failed to save rating');
-    } finally {
-      setIsSavingReview(false);
-    }
-  };
-
   const handleSaveReview = async () => {
     if (!userRating) {
       toast.error('Please select a rating');
       return;
     }
-    await handleRate(userRating);
+
+    try {
+      setIsSavingReview(true);
+      const response = await rateRecipe(id, { 
+        rating: userRating, 
+        comment: userReview 
+      });
+      
+      setRecipe(prev => ({
+        ...prev,
+        reviews: response.data.reviews,
+        averageRating: response.data.averageRating
+      }));
+      
+      toast.success('Review saved successfully!');
+    } catch (error) {
+      console.error('Error saving review:', error);
+      toast.error('Failed to save review');
+    } finally {
+      setIsSavingReview(false);
+    }
   };
 
   const handleUpdate = async (formData) => {
@@ -141,6 +134,7 @@ const RecipeDetail = () => {
           recipeId={id}
           initialCount={recipe.favoriteCount || 0}
           isInitiallyFavorited={recipe.favorites?.includes(user?._id) || false}
+          onFavoriteChange={fetchRecipe}
         />
         
         {user && (
@@ -189,10 +183,13 @@ const RecipeDetail = () => {
           </div>
 
           <div className="rating-section">
-            <h3>Rating: {recipe.averageRating || 'Not rated yet'}</h3>
+            <h3>
+              Rating: {recipe.averageRating || 'Not rated yet'} 
+              ({recipe.reviews?.length || 0} reviews)
+            </h3>
             <StarRating 
               rating={userRating} 
-              onRate={handleRate} 
+              onRate={setUserRating} 
               editable={!!user}
             />
             {user && (
@@ -232,6 +229,25 @@ const RecipeDetail = () => {
               </ol>
             </section>
           </div>
+
+          {recipe.reviews?.length > 0 && (
+            <div className="reviews-section">
+              <h3>Reviews</h3>
+              {recipe.reviews.map((review, index) => (
+                <div key={index} className="review-item">
+                  <div className="review-header">
+                    <span className="review-author">
+                      {review.author?.name || 'Anonymous'}
+                    </span>
+                    <StarRating rating={review.rating} editable={false} />
+                  </div>
+                  {review.comment && (
+                    <p className="review-comment">{review.comment}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

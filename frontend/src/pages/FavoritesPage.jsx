@@ -1,7 +1,7 @@
 // frontend/src/pages/FavoritesPage.jsx
 
 import { useEffect, useState } from 'react';
-import { getFavorites, deleteRecipe } from '../services/api';
+import { getFavorites, toggleFavorite } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import { useAuth } from '../context/AuthContext';
 import Pagination from '../components/Pagination';
@@ -17,23 +17,24 @@ const FavoritesPage = () => {
   const [totalItems, setTotalItems] = useState(0);
   const limit = 8;
 
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        setLoading(true);
-        if (user) {
-          const response = await getFavorites(currentPage, limit);
-          setFavorites(response.data.data || []);
-          setTotalPages(response.data.pagination?.totalPages || 1);
-          setTotalItems(response.data.pagination?.totalItems || 0);
-        }
-      } catch (error) {
-        setError('Failed to load favorites');
-        toast.error('Failed to load favorites');
-      } finally {
-        setLoading(false);
+  const fetchFavorites = async () => {
+    try {
+      setLoading(true);
+      if (user) {
+        const response = await getFavorites(currentPage, limit);
+        setFavorites(response.data.data || []);
+        setTotalPages(response.data.pagination?.totalPages || 1);
+        setTotalItems(response.data.pagination?.totalItems || 0);
       }
-    };
+    } catch (error) {
+      setError('Failed to load favorites');
+      toast.error('Failed to load favorites');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchFavorites();
   }, [user, currentPage]);
 
@@ -41,9 +42,11 @@ const FavoritesPage = () => {
     if (!window.confirm('Remove from favorites?')) return;
     
     try {
-      await deleteRecipe(recipeId);
+      await toggleFavorite(recipeId);
       setFavorites(prev => prev.filter(r => r._id !== recipeId));
       toast.success('Removed from favorites!');
+      // Update total count after removal
+      setTotalItems(prev => prev - 1);
     } catch (error) {
       toast.error('Failed to remove from favorites');
     }
@@ -70,7 +73,8 @@ const FavoritesPage = () => {
               <RecipeCard 
                 key={recipe._id} 
                 recipe={recipe}
-                onDelete={() => handleRemoveFavorite(recipe._id)}
+                showRemoveButton={true}
+                onRemove={() => handleRemoveFavorite(recipe._id)}
               />
             ))}
           </div>

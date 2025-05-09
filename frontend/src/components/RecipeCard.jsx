@@ -4,7 +4,7 @@ import RecipeImage from './RecipeImage';
 import FavoriteButton from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
 
-const RecipeCard = ({ recipe, onDelete }) => {
+const RecipeCard = ({ recipe, showRemoveButton = false, onRemove }) => {
   const { user } = useAuth();
 
   return (
@@ -32,11 +32,11 @@ const RecipeCard = ({ recipe, onDelete }) => {
           initialCount={recipe.favoriteCount || 0}
           isInitiallyFavorited={recipe.favorites?.includes(user?._id) || false}
         />
-        {onDelete && (
+        {showRemoveButton && (
           <button 
             onClick={(e) => {
-              e.stopPropagation();
-              onDelete(recipe._id);
+              e.preventDefault();
+              onRemove();
             }}
             className="remove-favorite"
           >
