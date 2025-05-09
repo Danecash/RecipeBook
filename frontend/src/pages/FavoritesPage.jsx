@@ -22,11 +22,14 @@ const FavoritesPage = () => {
       setLoading(true);
       if (user) {
         const response = await getFavorites(currentPage, limit);
-        setFavorites(response.data.data || []);
-        setTotalPages(response.data.pagination?.totalPages || 1);
-        setTotalItems(response.data.pagination?.totalItems || 0);
+        if (response.data) {
+          setFavorites(response.data.data || []);
+          setTotalPages(response.data.pagination?.totalPages || 1);
+          setTotalItems(response.data.pagination?.totalItems || 0);
+        }
       }
     } catch (error) {
+      console.error('Failed to load favorites:', error);
       setError('Failed to load favorites');
       toast.error('Failed to load favorites');
     } finally {
@@ -42,12 +45,14 @@ const FavoritesPage = () => {
     if (!window.confirm('Remove from favorites?')) return;
     
     try {
-      await toggleFavorite(recipeId);
-      setFavorites(prev => prev.filter(r => r._id !== recipeId));
-      toast.success('Removed from favorites!');
-      // Update total count after removal
-      setTotalItems(prev => prev - 1);
+      const response = await toggleFavorite(recipeId);
+      if (response.data.success) {
+        setFavorites(prev => prev.filter(r => r._id !== recipeId));
+        setTotalItems(prev => prev - 1);
+        toast.success('Removed from favorites!');
+      }
     } catch (error) {
+      console.error('Failed to remove favorite:', error);
       toast.error('Failed to remove from favorites');
     }
   };
@@ -79,13 +84,15 @@ const FavoritesPage = () => {
             ))}
           </div>
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={totalItems}
-            itemsPerPage={limit}
-            onPageChange={handlePageChange}
-          />
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={limit}
+              onPageChange={handlePageChange}
+            />
+          )}
         </>
       )}
     </div>

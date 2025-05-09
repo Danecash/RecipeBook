@@ -1,7 +1,7 @@
 // frontend/src/pages/RecipeDetail.jsx
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { 
   getRecipeById, 
   deleteRecipe,
@@ -17,7 +17,6 @@ import { toast } from 'react-toastify';
 const RecipeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -184,14 +183,20 @@ const RecipeDetail = () => {
 
           <div className="rating-section">
             <h3>
-              Rating: {recipe.averageRating || 'Not rated yet'} 
-              ({recipe.reviews?.length || 0} reviews)
+              Average Rating: {recipe.averageRating ? recipe.averageRating.toFixed(1) : 'Not rated yet'} 
+              <span className="review-count">({recipe.reviews?.length || 0} reviews)</span>
             </h3>
-            <StarRating 
-              rating={userRating} 
-              onRate={setUserRating} 
-              editable={!!user}
-            />
+            
+            <div className="user-rating">
+              <h4>Your Rating:</h4>
+              <StarRating 
+                rating={userRating} 
+                onRate={setUserRating} 
+                editable={!!user}
+                showRating={true}
+              />
+            </div>
+            
             {user && (
               <div className="review-form">
                 <textarea
@@ -232,14 +237,18 @@ const RecipeDetail = () => {
 
           {recipe.reviews?.length > 0 && (
             <div className="reviews-section">
-              <h3>Reviews</h3>
-              {recipe.reviews.map((review, index) => (
+              <h3>Recent Reviews</h3>
+              {recipe.reviews.slice(0, 5).map((review, index) => (
                 <div key={index} className="review-item">
                   <div className="review-header">
                     <span className="review-author">
                       {review.author?.name || 'Anonymous'}
                     </span>
-                    <StarRating rating={review.rating} editable={false} />
+                    <StarRating 
+                      rating={review.rating} 
+                      editable={false} 
+                      showRating={true}
+                    />
                   </div>
                   {review.comment && (
                     <p className="review-comment">{review.comment}</p>

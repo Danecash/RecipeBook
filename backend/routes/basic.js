@@ -187,32 +187,25 @@ router.post('/recipes/:id/favorite', protect, async (req, res) => {
 // Get favorites
 router.get('/favorites', protect, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 8;
-    const skip = (page - 1) * limit;
-
-    const user = await User.findById(req.user._id).populate({
-      path: 'favorites',
-      options: {
-        skip,
-        limit,
-        sort: { createdAt: -1 }
-      }
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    const user = await User.findById(req.user._id)
+      .populate({
+        path: 'favorites',
+        options: {
+          limit: parseInt(req.query.limit) || 8,
+          skip: (parseInt(req.query.page) - 1) * parseInt(req.query.limit) || 0,
+          sort: { createdAt: -1 }
+        }
+      });
 
     const total = await User.findById(req.user._id).then(u => u.favorites.length);
 
     res.json({
       data: user.favorites,
       pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(total / limit),
+        currentPage: parseInt(req.query.page) || 1,
+        totalPages: Math.ceil(total / (parseInt(req.query.limit) || 8)),
         totalItems: total,
-        itemsPerPage: limit
+        itemsPerPage: parseInt(req.query.limit) || 8
       }
     });
   } catch (error) {
@@ -389,16 +382,13 @@ router.post('/recipes/:id/rate', protect, async (req, res) => {
 
     await recipe.save();
     
-    // Populate author information
-    const populatedRecipe = await Recipe.populate(recipe, {
-      path: 'reviews.author',
-      select: 'name'
-    });
+    // Calculate average rating
+    const avgRating = recipe.reviews.reduce((sum, review) => sum + review.rating, 0) / recipe.reviews.length;
 
     res.json({
       success: true,
-      reviews: populatedRecipe.reviews,
-      averageRating: recipe.averageRating
+      reviews: recipe.reviews,
+      averageRating: avgRating
     });
   } catch (error) {
     console.error(`POST /recipes/${req.params.id}/rate error:`, error);
