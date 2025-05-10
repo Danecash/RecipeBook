@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getRecipeById, deleteRecipe, updateRecipe } from '../services/api';
 import FavoriteButton from '../components/FavoriteButton';
+import Rating from '../components/Rating';
 import { useAuth } from '../context/AuthContext';
 
 const RecipeDetail = () => {
@@ -25,6 +26,10 @@ const RecipeDetail = () => {
     image: null
   });
   const [preview, setPreview] = useState('');
+  const [ratingData, setRatingData] = useState({
+    averageRating: 0,
+    totalRatings: 0
+  });
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -170,6 +175,13 @@ const RecipeDetail = () => {
     }
   };
 
+  const handleRatingChange = (data) => {
+    setRatingData({
+      averageRating: data.averageRating,
+      totalRatings: data.totalRatings
+    });
+  };
+
   if (loading) return <div className="loading">Loading recipe...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!recipe) return <div className="error">Recipe not found</div>;
@@ -283,67 +295,64 @@ const RecipeDetail = () => {
         ← Back
       </button>
 
-      <div className="recipe-actions">
-        <FavoriteButton 
-          recipeId={id}
-          initialCount={recipe.favoriteCount || 0}
-          isInitiallyFavorited={recipe.favorites?.includes(user?._id) || false}
-        />
-        {user && (
-          <button 
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="delete-button"
-          >
-            {isDeleting ? 'Deleting...' : 'Delete Recipe'}
-          </button>
-        )}
-        {error && <div className="error-message">{error}</div>}
-      </div>
-
       <div className="recipe-header">
         <h1>{recipe.name}</h1>
-        <span className={`category-badge ${recipe.category.toLowerCase()}`}>
-          {recipe.category}
-        </span>
+        <div className="recipe-actions">
+          <FavoriteButton recipeId={recipe._id} />
+          {user && user._id === recipe.author?._id && (
+            <>
+              <button onClick={() => setIsEditing(true)}>Edit</button>
+              <button 
+                onClick={handleDelete} 
+                disabled={isDeleting}
+                className="delete-button"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
-      <div className="image-container">
-        <img
-          src={imageUrl}
-          alt={recipe.name}
-          onError={(e) => {
-            e.target.src = '/placeholder-recipe.jpg';
-          }}
-          className="detail-image"
+      <div className="recipe-image">
+        <img src={imageUrl} alt={recipe.name} />
+      </div>
+
+      <div className="recipe-rating">
+        <Rating 
+          recipeId={recipe._id} 
+          initialRating={recipe.averageRating}
+          onRatingChange={handleRatingChange}
         />
+        <div className="rating-stats">
+          <span>Average Rating: {ratingData.averageRating.toFixed(1)}</span>
+          <span>Total Ratings: {ratingData.totalRatings}</span>
+        </div>
+      </div>
+
+      <div className="recipe-category">
+        <span>Category: {recipe.category}</span>
       </div>
 
       <div className="recipe-content">
-        <section className="ingredients">
+        <div className="ingredients">
           <h2>Ingredients</h2>
           <ul>
-            {recipe.ingredients.map((ingredient, i) => (
-              <li key={i}>{ingredient}</li>
+            {recipe.ingredients.map((ingredient, index) => (
+              <li key={index}>{ingredient}</li>
             ))}
           </ul>
-        </section>
+        </div>
 
-        <section className="instructions">
+        <div className="instructions">
           <h2>Instructions</h2>
           <ol>
-            {recipe.instructions.map((instruction, i) => (
-              <li key={i}>{instruction}</li>
+            {recipe.instructions.map((instruction, index) => (
+              <li key={index}>{instruction}</li>
             ))}
           </ol>
-        </section>
+        </div>
       </div>
-
-      {user && (
-        <button onClick={() => setIsEditing(true)} className="edit-button">
-          Edit Recipe
-        </button>
-      )}
     </div>
   );
 };

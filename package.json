@@ -1,0 +1,23 @@
+{
+  "name": "recipebook",
+  "version": "1.0.0",
+  "description": "The Recipe Book is a web-based application that allows users to store, manage, and share their favorite recipes. It provides a structured way to organize recipes with ingredients, instructions, and categories. This project is built using Node.js with Express.js for the backend and integrates a database to store recipes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Danecash/RecipeBook.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Danecash/RecipeBook/issues"
+  },
+  "homepage": "https://github.com/Danecash/RecipeBook#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

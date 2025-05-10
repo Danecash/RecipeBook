@@ -25,10 +25,33 @@ export const getRecipesByCategory = (category, page = 1, limit = 12, options = {
   });
 };
 
-export const searchRecipes = (query, page = 1, limit = 12) => {
-  return api.get(`/search/${encodeURIComponent(query)}`, {
-    params: { page, limit }
-  });
+export const searchRecipes = async (query, page = 1, limit = 12) => {
+  try {
+    const response = await api.get(`/search/${encodeURIComponent(query)}`, {
+      params: { page, limit }
+    });
+    console.log('Raw search response:', response); // Debug log
+    
+    // If the response is an array, wrap it in a data object
+    if (Array.isArray(response.data)) {
+      return {
+        ...response,
+        data: {
+          data: response.data,
+          pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(response.data.length / limit),
+            totalItems: response.data.length,
+            itemsPerPage: limit
+          }
+        }
+      };
+    }
+    return response;
+  } catch (error) {
+    console.error('Search API error:', error);
+    throw error;
+  }
 };
 
 export const addRecipe = (recipeData) => {
@@ -118,4 +141,19 @@ export const getFavorites = async () => {
     console.error('Error in getFavorites:', error);
     throw error;
   }
+};
+
+// Delete from favorites
+export const deleteFavorite = async (recipeId) => {
+  return axios.delete(`/api/favorites/${recipeId}`);
+};
+
+// Rate a recipe
+export const rateRecipe = async (recipeId, rating) => {
+  return axios.post(`/api/recipes/${recipeId}/rate`, { rating });
+};
+
+// Get recipe ratings
+export const getRecipeRatings = async (recipeId) => {
+  return axios.get(`/api/recipes/${recipeId}/ratings`);
 };

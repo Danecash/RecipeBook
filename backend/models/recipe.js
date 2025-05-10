@@ -55,13 +55,30 @@ const recipeSchema = new mongoose.Schema({
   favorites: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    index: true // Added index for better query performance
+    index: true
   }],
   favoriteCount: {
     type: Number,
     default: 0,
     min: 0
   },
+  ratings: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   reviews: [{
     rating: {
       type: Number,
@@ -93,27 +110,15 @@ const recipeSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true,
-  toJSON: {
-    virtuals: true,
-    transform: function(doc, ret) {
-      // Add full URL when converting to JSON
-      if (ret.image && !ret.image.startsWith('http')) {
-        ret.image = `${process.env.BASE_URL || 'http://localhost:3000'}${ret.image}`;
-      }
-      if (ret.imageOptimized && !ret.imageOptimized.startsWith('http')) {
-        ret.imageOptimized = `${process.env.BASE_URL || 'http://localhost:3000'}${ret.imageOptimized}`;
-      }
-      
-      // Remove sensitive/internal fields
-      delete ret.__v;
-      delete ret._id;
-      ret.id = doc._id.toString();
-      return ret;
-    }
-  },
-  toObject: {
-    virtuals: true
-  }
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Virtual for average rating
+recipeSchema.virtual('averageRating').get(function() {
+  if (!this.ratings || this.ratings.length === 0) return 0;
+  const totalRatings = this.ratings.reduce((sum, r) => sum + r.rating, 0);
+  return totalRatings / this.ratings.length;
 });
 
 // Auto-create optimized image path
@@ -150,13 +155,6 @@ recipeSchema.index({
 recipeSchema.index({ favorites: 1 });
 recipeSchema.index({ favoriteCount: -1 });
 recipeSchema.index({ createdAt: -1 });
-
-// Virtual for average rating
-recipeSchema.virtual('averageRating').get(function() {
-  if (!this.reviews || this.reviews.length === 0) return 0;
-  const sum = this.reviews.reduce((acc, review) => acc + review.rating, 0);
-  return (sum / this.reviews.length).toFixed(1);
-});
 
 recipeSchema.plugin(mongoosePaginate);
 

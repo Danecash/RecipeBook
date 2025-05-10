@@ -9,22 +9,36 @@ const SearchPage = () => {
   const { query } = useParams();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const response = await searchRecipes(query);
-        setResults(response.data);
+        console.log('Search response:', response); // Debug log
+        
+        // Handle both array and object responses
+        const recipes = Array.isArray(response.data) ? response.data : 
+                       response.data?.data || [];
+        
+        setResults(recipes);
       } catch (error) {
         console.error('Search error:', error);
+        setError(error.response?.data?.error || 'Failed to fetch search results. Please try again.');
       } finally {
         setLoading(false);
       }
     };
-    fetchResults();
+
+    if (query) {
+      fetchResults();
+    }
   }, [query]);
 
   if (loading) return <div className="loading">Searching...</div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div className="search-page">

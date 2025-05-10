@@ -72,15 +72,23 @@ router.get("/recipes/:id", async (req, res) => {
 // SEARCH recipes
 router.get("/search/:query", async (req, res) => {
   try {
+    const searchQuery = req.params.query.trim();
+    if (!searchQuery) {
+      return res.json([]);
+    }
+
     const recipes = await Recipe.find({
       $or: [
-        { name: { $regex: req.params.query, $options: "i" } },
-        { ingredients: { $regex: req.params.query, $options: "i" } }
+        { name: { $regex: searchQuery, $options: "i" } },
+        { category: { $regex: searchQuery, $options: "i" } },
+        { ingredients: { $regex: searchQuery, $options: "i" } }
       ]
     })
     .select('+imageOptimized')
     .lean()
     .transform(docs => docs.map(formatRecipeImage));
+
+    console.log(`Search results for "${searchQuery}":`, recipes.length);
     res.json(recipes);
   } catch (error) {
     console.error("GET /search error:", error);
@@ -348,6 +356,97 @@ router.delete("/recipes/:id", async (req, res) => {
         stack: error.stack
       })
     });
+  }
+});
+
+// Delete from favorites
+router.delete('/favorites/:id', protect, async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) return res.status(404).json({ error: "Recipe not found" });
+
+    const userId = req.user._id;
+    const index = recipe.favorites.indexOf(userId);
+
+    if (index === -1) {
+      return res.status(400).json({ error: "Recipe is not in favorites" });
+    }
+
+    recipe.favorites.splice(index, 1);
+    recipe.favoriteCount -= 1;
+    await recipe.save();
+
+    res.json({ 
+      success: true, 
+      favoriteCount: recipe.favoriteCount,
+      message: "Recipe removed from favorites"
+    });
+  } catch (error) {
+    console.error("Error removing from favorites:", error);
+    res.status(500).json(serverError(error));
+  }
+});
+
+// Add rating to recipe
+router.post('/recipes/:id/rate', protect, async (req, res) => {
+  try {
+    const { rating } = req.body;
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Rating must be between 1 and 5" });
+    }
+
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) return res.status(404).json({ error: "Recipe not found" });
+
+    // Check if user has already rated
+    const existingRatingIndex = recipe.ratings.findIndex(
+      r => r.user.toString() === req.user._id.toString()
+    );
+
+    if (existingRatingIndex !== -1) {
+      // Update existing rating
+      recipe.ratings[existingRatingIndex].rating = rating;
+    } else {
+      // Add new rating
+      recipe.ratings.push({
+        user: req.user._id,
+        rating: rating
+      });
+    }
+
+    await recipe.save();
+    
+    // Get the updated recipe with virtuals
+    const updatedRecipe = await Recipe.findById(req.params.id);
+    
+    res.json({
+      success: true,
+      averageRating: updatedRecipe.averageRating,
+      totalRatings: updatedRecipe.ratings.length
+    });
+  } catch (error) {
+    console.error("Error rating recipe:", error);
+    res.status(500).json(serverError(error));
+  }
+});
+
+// Get recipe ratings
+router.get('/recipes/:id/ratings', async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id)
+      .select('ratings')
+      .populate('ratings.user', 'name');
+    
+    if (!recipe) return res.status(404).json({ error: "Recipe not found" });
+
+    res.json({
+      ratings: recipe.ratings,
+      averageRating: recipe.averageRating,
+      totalRatings: recipe.ratings.length
+    });
+  } catch (error) {
+    console.error("Error fetching ratings:", error);
+    res.status(500).json(serverError(error));
   }
 });
 
