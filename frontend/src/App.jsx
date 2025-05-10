@@ -15,6 +15,9 @@ import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AllRecipesPage from './pages/AllRecipesPage';
+import FindByIngredientsPage from './pages/FindByIngredientsPage';
+
 
 function App() {
   return (
@@ -32,6 +35,8 @@ function App() {
             <Route path="/category/:category" element={<CategoryPage />} />
             <Route path="/search/:query" element={<SearchPage />} />
             <Route path="/popular" element={<PopularRecipesPage />} /> {/* Add this route */}
+            <Route path="/all-recipes" element={<AllRecipesPage />} />
+            <Route path="/find-by-ingredients" element={<FindByIngredientsPage />} />
           </Routes>
           <ToastContainer 
             position="bottom-right"

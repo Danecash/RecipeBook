@@ -128,13 +128,53 @@ export const updateRecipe = (recipeId, recipeData) => {
 
 export const getPopularRecipes = async (page = 1, limit = 10) => {
   try {
-    const response = await api.get('/recipes/popular', {
+    const response = await api.get('/popular-recipes', {
+      params: { 
+        page,
+        limit
+      }
+    });
+    
+    // Ensure the response has the expected structure
+    if (response.data && response.data.success) {
+      return {
+        success: true,
+        data: response.data.data,
+        pagination: response.data.pagination
+      };
+    }
+    throw new Error(response.data?.error || 'Invalid response structure');
+  } catch (error) {
+    console.error('Error fetching popular recipes:', error);
+    throw error;
+  }
+};
+
+export const getAllRecipes = async (page = 1, limit = 12) => {
+  try {
+    const response = await api.get('/all-recipes', {
       params: { page, limit }
     });
-    console.log('Popular recipes response:', response.data);
+
     return response.data;
   } catch (error) {
-    console.error('Error fetching popular recipes:', error.response?.data || error.message);
+    console.error('Error fetching all recipes:', error);
+    throw error;
+  }
+};
+
+export const searchRecipesByIngredients = async (ingredients, page = 1, limit = 12) => {
+  try {
+    const response = await api.get('/recipes/by-ingredients', {
+      params: { 
+        ingredients: ingredients.join(','),
+        page,
+        limit 
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error searching recipes by ingredients:', error);
     throw error;
   }
 };

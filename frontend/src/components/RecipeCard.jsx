@@ -3,8 +3,15 @@ import { Link } from 'react-router-dom';
 import RecipeImage from './RecipeImage';
 import FavoriteButton from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
+import { FaHeart, FaStar, FaComment } from 'react-icons/fa';
 
-const RecipeCard = ({ recipe, showStats = false, showRemoveButton = false, onRemove }) => {
+const RecipeCard = ({
+  recipe,
+  showStats = false,
+  showRemoveButton = false,
+  onRemove,
+  extraInfo = null, // ✅ New prop added
+}) => {
   const { user } = useAuth();
 
   return (
@@ -16,7 +23,7 @@ const RecipeCard = ({ recipe, showStats = false, showRemoveButton = false, onRem
           <span className={`category-tag ${recipe.category.toLowerCase()}`}>
             {recipe.category}
           </span>
-          
+
           {showStats && (
             <div className="recipe-stats">
               <div className="stat">
@@ -30,11 +37,17 @@ const RecipeCard = ({ recipe, showStats = false, showRemoveButton = false, onRem
               </div>
             </div>
           )}
+
+          {extraInfo && ( // ✅ Conditionally render extra info
+            <div className="recipe-extra-info">
+              {extraInfo}
+            </div>
+          )}
         </div>
       </Link>
-      
+
       {showRemoveButton && (
-        <button 
+        <button
           onClick={(e) => {
             e.preventDefault();
             onRemove();

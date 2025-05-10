@@ -428,12 +428,16 @@ router.get('/favorites', protect, async (req, res) => {
 
 // Get popular recipes
 // Popular recipes endpoint
-router.get('/recipes/popular', async (req, res) => {
+router.get("/popular-recipes", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    // Get total count first
+    const total = await Recipe.countDocuments();
+
+    // Get popular recipes with aggregation
     const recipes = await Recipe.aggregate([
       {
         $addFields: {
@@ -452,6 +456,7 @@ router.get('/recipes/popular', async (req, res) => {
       { $limit: limit },
       {
         $project: {
+          _id: 1,
           name: 1,
           category: 1,
           ingredients: 1,
@@ -459,14 +464,14 @@ router.get('/recipes/popular', async (req, res) => {
           image: 1,
           imageOptimized: 1,
           favoriteCount: 1,
+          favorites: 1,
+          reviews: 1,
           averageRating: 1,
           reviewCount: 1,
-          favorites: 1
+          createdAt: 1
         }
       }
     ]);
-
-    const total = await Recipe.countDocuments();
 
     res.json({
       success: true,
@@ -483,6 +488,130 @@ router.get('/recipes/popular', async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to fetch popular recipes",
+      details: error.message
+    });
+  }
+});
+
+// Add this new route
+router.get("/all-recipes", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
+    const [recipes, total] = await Promise.all([
+      Recipe.find()
+        .sort({ createdAt: -1 }) // Sort by newest first
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Recipe.countDocuments()
+    ]);
+
+    // Add time since creation to each recipe
+    const recipesWithDuration = recipes.map(recipe => {
+      const createdAt = new Date(recipe.createdAt);
+      const now = new Date();
+      const diffTime = Math.abs(now - createdAt);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      
+      return {
+        ...recipe,
+        daysSinceCreation: diffDays
+      };
+    });
+
+    res.json({
+      success: true,
+      data: recipesWithDuration,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: limit
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching all recipes:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch recipes",
+      details: error.message
+    });
+  }
+});
+
+// Add this new route
+router.get("/recipes/by-ingredients", async (req, res) => {
+  try {
+    const ingredients = req.query.ingredients;
+    if (!ingredients) {
+      return res.status(400).json({ error: "Ingredients parameter is required" });
+    }
+
+    const ingredientList = ingredients.split(',').map(ing => ing.trim().toLowerCase());
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
+    // Find recipes that contain at least one of the ingredients
+    const [recipes, total] = await Promise.all([
+      Recipe.find({
+        ingredients: {
+          $elemMatch: {
+            $in: ingredientList.map(ing => new RegExp(ing, 'i'))
+          }
+        }
+      })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      Recipe.countDocuments({
+        ingredients: {
+          $elemMatch: {
+            $in: ingredientList.map(ing => new RegExp(ing, 'i'))
+          }
+        }
+      })
+    ]);
+
+    // Add match percentage to each recipe
+    const recipesWithMatch = recipes.map(recipe => {
+      const matchedIngredients = recipe.ingredients.filter(ing =>
+        ingredientList.some(searchIng =>
+          ing.toLowerCase().includes(searchIng.toLowerCase())
+        )
+      );
+
+      const matchPercentage = Math.round(
+        (matchedIngredients.length / ingredientList.length) * 100
+      );
+
+      return {
+        ...recipe,
+        matchPercentage,
+        matchedIngredients
+      };
+    });
+
+    res.json({
+      success: true,
+      data: recipesWithMatch,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: limit
+      }
+    });
+  } catch (error) {
+    console.error("Error searching by ingredients:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to search recipes",
       details: error.message
     });
   }
