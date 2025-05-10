@@ -158,6 +158,9 @@ recipeSchema.virtual('averageRating').get(function() {
   return (sum / this.reviews.length).toFixed(1);
 });
 
+// Add this index to the recipeSchema
+recipeSchema.index({ favoriteCount: -1, averageRating: -1, reviews: -1 });
+
 recipeSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model("Recipe", recipeSchema);

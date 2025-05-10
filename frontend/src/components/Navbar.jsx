@@ -12,6 +12,7 @@ const Navbar = () => {
       
       <div className="nav-links">
         <SearchBar />
+        <Link to="/popular">Popular</Link> {/* Add this link */}
         
         {user ? (
           <>

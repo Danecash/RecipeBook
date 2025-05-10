@@ -10,6 +10,7 @@ import AddRecipe from './pages/AddRecipe';
 import RecipeDetail from './pages/RecipeDetail';
 import CategoryPage from './pages/CategoryPage';
 import SearchPage from './pages/SearchPage';
+import PopularRecipesPage from './pages/PopularRecipesPage'; // Add this import
 import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastContainer } from 'react-toastify';
@@ -30,6 +31,7 @@ function App() {
             <Route path="/recipe/:id" element={<RecipeDetail />} />
             <Route path="/category/:category" element={<CategoryPage />} />
             <Route path="/search/:query" element={<SearchPage />} />
+            <Route path="/popular" element={<PopularRecipesPage />} /> {/* Add this route */}
           </Routes>
           <ToastContainer 
             position="bottom-right"

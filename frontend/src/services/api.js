@@ -126,5 +126,17 @@ export const updateRecipe = (recipeId, recipeData) => {
   });
 };
 
+export const getPopularRecipes = async (page = 1, limit = 10) => {
+  try {
+    const response = await api.get('/recipes/popular', {
+      params: { page, limit }
+    });
+    console.log('Popular recipes response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching popular recipes:', error.response?.data || error.message);
+    throw error;
+  }
+};
 
 export default api;

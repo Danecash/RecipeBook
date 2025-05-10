@@ -4,46 +4,46 @@ import RecipeImage from './RecipeImage';
 import FavoriteButton from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
 
-const RecipeCard = ({ recipe, showRemoveButton = false, onRemove }) => {
+const RecipeCard = ({ recipe, showStats = false, showRemoveButton = false, onRemove }) => {
   const { user } = useAuth();
 
   return (
     <div className="recipe-card">
-      <Link 
-        to={`/recipe/${recipe._id}`}
-        state={{ recipe }}
-      >
+      <Link to={`/recipe/${recipe._id}`} state={{ recipe }}>
         <RecipeImage recipe={recipe} className="card-image" />
         <div className="card-content">
           <h3>{recipe.name}</h3>
           <span className={`category-tag ${recipe.category.toLowerCase()}`}>
             {recipe.category}
           </span>
-          {recipe.averageRating && (
-            <div className="rating-badge">
-              ⭐ {recipe.averageRating}
+          
+          {showStats && (
+            <div className="recipe-stats">
+              <div className="stat">
+                <FaHeart /> {recipe.favoriteCount || 0}
+              </div>
+              <div className="stat">
+                <FaStar /> {recipe.averageRating?.toFixed(1) || '0.0'}
+              </div>
+              <div className="stat">
+                <FaComment /> {recipe.reviews?.length || 0}
+              </div>
             </div>
           )}
         </div>
       </Link>
-      <div className="card-actions">
-        <FavoriteButton 
-          recipeId={recipe._id}
-          initialCount={recipe.favoriteCount || 0}
-          isInitiallyFavorited={recipe.favorites?.includes(user?._id) || false}
-        />
-        {showRemoveButton && (
-          <button 
-            onClick={(e) => {
-              e.preventDefault();
-              onRemove();
-            }}
-            className="remove-favorite"
-          >
-            Remove
-          </button>
-        )}
-      </div>
+      
+      {showRemoveButton && (
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            onRemove();
+          }}
+          className="remove-btn"
+        >
+          Remove
+        </button>
+      )}
     </div>
   );
 };

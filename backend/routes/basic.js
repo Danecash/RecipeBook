@@ -426,5 +426,67 @@ router.get('/favorites', protect, async (req, res) => {
   }
 });
 
+// Get popular recipes
+// Popular recipes endpoint
+router.get('/recipes/popular', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const recipes = await Recipe.aggregate([
+      {
+        $addFields: {
+          averageRating: {
+            $cond: [
+              { $gt: [{ $size: "$reviews" }, 0] },
+              { $avg: "$reviews.rating" },
+              0
+            ]
+          },
+          reviewCount: { $size: "$reviews" }
+        }
+      },
+      { $sort: { favoriteCount: -1, averageRating: -1, reviewCount: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          name: 1,
+          category: 1,
+          ingredients: 1,
+          instructions: 1,
+          image: 1,
+          imageOptimized: 1,
+          favoriteCount: 1,
+          averageRating: 1,
+          reviewCount: 1,
+          favorites: 1
+        }
+      }
+    ]);
+
+    const total = await Recipe.countDocuments();
+
+    res.json({
+      success: true,
+      data: recipes,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: limit
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching popular recipes:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch popular recipes",
+      details: error.message
+    });
+  }
+});
+
 module.exports = router;
 
