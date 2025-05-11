@@ -1,4 +1,5 @@
 // backend/models/recipe.js
+
 const mongoose = require("mongoose");
 const mongoosePaginate = require('mongoose-paginate-v2');
 const path = require('path');
@@ -55,7 +56,7 @@ const recipeSchema = new mongoose.Schema({
   favorites: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    index: true // Added index for better query performance
+    index: true
   }],
   favoriteCount: {
     type: Number,
@@ -96,15 +97,12 @@ const recipeSchema = new mongoose.Schema({
   toJSON: {
     virtuals: true,
     transform: function(doc, ret) {
-      // Add full URL when converting to JSON
       if (ret.image && !ret.image.startsWith('http')) {
         ret.image = `${process.env.BASE_URL || 'http://localhost:3000'}${ret.image}`;
       }
       if (ret.imageOptimized && !ret.imageOptimized.startsWith('http')) {
         ret.imageOptimized = `${process.env.BASE_URL || 'http://localhost:3000'}${ret.imageOptimized}`;
       }
-      
-      // Remove sensitive/internal fields
       delete ret.__v;
       delete ret._id;
       ret.id = doc._id.toString();
@@ -146,10 +144,15 @@ recipeSchema.index({
   }
 });
 
-// Index for favorites and sorting
+// Indexes for performance
 recipeSchema.index({ favorites: 1 });
 recipeSchema.index({ favoriteCount: -1 });
 recipeSchema.index({ createdAt: -1 });
+recipeSchema.index({ favoriteCount: -1, averageRating: -1, reviews: -1 });
+
+// New indexes as requested
+recipeSchema.index({ ingredients: 'text' });         // Full-text search on ingredients
+recipeSchema.index({ ingredients: 1 });              // Array field index for faster querying
 
 // Virtual for average rating
 recipeSchema.virtual('averageRating').get(function() {
@@ -157,9 +160,6 @@ recipeSchema.virtual('averageRating').get(function() {
   const sum = this.reviews.reduce((acc, review) => acc + review.rating, 0);
   return (sum / this.reviews.length).toFixed(1);
 });
-
-// Add this index to the recipeSchema
-recipeSchema.index({ favoriteCount: -1, averageRating: -1, reviews: -1 });
 
 recipeSchema.plugin(mongoosePaginate);
 

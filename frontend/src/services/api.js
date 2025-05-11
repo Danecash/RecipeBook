@@ -165,17 +165,40 @@ export const getAllRecipes = async (page = 1, limit = 12) => {
 
 export const searchRecipesByIngredients = async (ingredients, page = 1, limit = 12) => {
   try {
+    // Ensure ingredients is an array
+    const ingredientsArray = Array.isArray(ingredients) ? ingredients : [ingredients];
+    
+    // Filter out empty strings and encode
+    const nonEmptyIngredients = ingredientsArray
+      .filter(ing => ing.trim() !== '')
+      .map(ing => encodeURIComponent(ing.trim()));
+    
+    if (nonEmptyIngredients.length === 0) {
+      throw new Error("At least one valid ingredient is required");
+    }
+
     const response = await api.get('/recipes/by-ingredients', {
-      params: { 
-        ingredients: ingredients.join(','),
+      params: {
+        ingredients: nonEmptyIngredients.join(','),
         page,
-        limit 
+        limit
       }
     });
+
+    if (!response.data?.success) {
+      throw new Error(response.data?.error || 'Invalid response from server');
+    }
+
     return response.data;
   } catch (error) {
-    console.error('Error searching recipes by ingredients:', error);
-    throw error;
+    console.error('Error searching by ingredients:', error);
+    
+    // Handle 400 Bad Request specifically
+    if (error.response?.status === 400) {
+      throw new Error(error.response.data?.error || 'Invalid ingredient search parameters');
+    }
+    
+    throw new Error(error.response?.data?.error || 'Failed to search recipes');
   }
 };
 

@@ -1,3 +1,5 @@
+// frontend/src/AllRecipesPage.jsx
+
 import { useEffect, useState } from 'react';
 import { getAllRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';

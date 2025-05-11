@@ -545,57 +545,71 @@ router.get("/all-recipes", async (req, res) => {
 // Add this new route
 router.get("/recipes/by-ingredients", async (req, res) => {
   try {
-    const ingredients = req.query.ingredients;
+    const { ingredients } = req.query;
+
     if (!ingredients) {
-      return res.status(400).json({ error: "Ingredients parameter is required" });
+      return res.status(400).json({
+        success: false,
+        error: "Ingredients parameter is required"
+      });
     }
 
-    const ingredientList = ingredients.split(',').map(ing => ing.trim().toLowerCase());
+    // Process ingredients
+    const ingredientList = ingredients.split(',')
+      .map(i => i.trim().toLowerCase())
+      .filter(i => i.length > 0);
+
+    if (ingredientList.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "At least one valid ingredient is required"
+      });
+    }
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
 
-    // Find recipes that contain at least one of the ingredients
+    // Create case-insensitive regex patterns
+    const regexPatterns = ingredientList.map(ing => 
+      new RegExp(ing.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i'));
+
+    // Find recipes that contain ANY of the ingredients
+    const query = {
+      ingredients: {
+        $in: regexPatterns
+      }
+    };
+
     const [recipes, total] = await Promise.all([
-      Recipe.find({
-        ingredients: {
-          $elemMatch: {
-            $in: ingredientList.map(ing => new RegExp(ing, 'i'))
-          }
-        }
-      })
+      Recipe.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-
-      Recipe.countDocuments({
-        ingredients: {
-          $elemMatch: {
-            $in: ingredientList.map(ing => new RegExp(ing, 'i'))
-          }
-        }
-      })
+      Recipe.countDocuments(query)
     ]);
 
-    // Add match percentage to each recipe
+    // Calculate match percentage
     const recipesWithMatch = recipes.map(recipe => {
-      const matchedIngredients = recipe.ingredients.filter(ing =>
-        ingredientList.some(searchIng =>
-          ing.toLowerCase().includes(searchIng.toLowerCase())
-        )
+      const matchedIngredients = recipe.ingredients.filter(ing => 
+        ingredientList.some(searchIng => 
+          new RegExp(`\\b${searchIng}\\b`, 'i').test(ing.toLowerCase()))
       );
-
+      
       const matchPercentage = Math.round(
         (matchedIngredients.length / ingredientList.length) * 100
       );
-
+      
       return {
         ...recipe,
         matchPercentage,
         matchedIngredients
       };
     });
+
+    // Sort by match percentage (highest first)
+    recipesWithMatch.sort((a, b) => b.matchPercentage - a.matchPercentage);
 
     res.json({
       success: true,
@@ -607,11 +621,12 @@ router.get("/recipes/by-ingredients", async (req, res) => {
         itemsPerPage: limit
       }
     });
+
   } catch (error) {
     console.error("Error searching by ingredients:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to search recipes",
+      error: "Internal server error",
       details: error.message
     });
   }
