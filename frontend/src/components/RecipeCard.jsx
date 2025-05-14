@@ -10,19 +10,23 @@ const RecipeCard = ({
   showStats = false,
   showRemoveButton = false,
   onRemove,
-  extraInfo = null, // ✅ New prop added
+  extraInfo = null,
 }) => {
   const { user } = useAuth();
 
   return (
     <div className="recipe-card">
       <Link to={`/recipe/${recipe._id}`} state={{ recipe }}>
-        <RecipeImage recipe={recipe} className="card-image" />
+        <div className="card-image-container">
+          <RecipeImage recipe={recipe} className="card-image" />
+          <div className="card-overlay">
+            <span className={`category-tag ${recipe.category.toLowerCase()}`}>
+              {recipe.category}
+            </span>
+          </div>
+        </div>
         <div className="card-content">
           <h3>{recipe.name}</h3>
-          <span className={`category-tag ${recipe.category.toLowerCase()}`}>
-            {recipe.category}
-          </span>
 
           {showStats && (
             <div className="recipe-stats">
@@ -38,7 +42,7 @@ const RecipeCard = ({
             </div>
           )}
 
-          {extraInfo && ( // ✅ Conditionally render extra info
+          {extraInfo && (
             <div className="recipe-extra-info">
               {extraInfo}
             </div>
@@ -46,17 +50,25 @@ const RecipeCard = ({
         </div>
       </Link>
 
-      {showRemoveButton && (
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            onRemove();
-          }}
-          className="remove-btn"
-        >
-          Remove
-        </button>
-      )}
+      <div className="card-actions">
+        <FavoriteButton 
+          recipeId={recipe._id}
+          initialCount={recipe.favoriteCount || 0}
+          isInitiallyFavorited={recipe.favorites?.includes(user?._id) || false}
+        />
+        
+        {showRemoveButton && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onRemove();
+            }}
+            className="remove-btn"
+          >
+            Remove
+          </button>
+        )}
+      </div>
     </div>
   );
 };

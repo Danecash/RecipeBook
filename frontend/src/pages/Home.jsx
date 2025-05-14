@@ -5,6 +5,7 @@ import { getRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
 import CategoryButtons from '../components/CategoryButtons';
+import { FaFire, FaSearch, FaArrowRight } from 'react-icons/fa';
 
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
@@ -40,30 +41,68 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      <section className="hero">
-        <h1>Welcome to Recipe Collection</h1>
-        <p>Discover delicious recipes for every occasion</p>
-        <Link to="/add-recipe" className="cta-button">Add Your Recipe</Link>
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1>Discover Delicious Recipes</h1>
+          <p>Find your next favorite meal from our curated collection</p>
+          <div className="search-container">
+            <input type="text" placeholder="Search recipes..." />
+            <button className="search-btn">
+              <FaSearch />
+            </button>
+          </div>
+        </div>
       </section>
 
+      {/* Category Buttons */}
       <CategoryButtons />
 
-      <section className="featured-recipes">
-        <h2>All Recipes</h2>
+      {/* Featured Recipes */}
+      <section className="section featured-recipes">
+        <div className="section-header">
+          <h2>
+            <FaFire className="section-icon" />
+            Featured Recipes
+          </h2>
+          <Link to="/popular" className="view-all">
+            View All <FaArrowRight />
+          </Link>
+        </div>
         <div className="recipes-grid">
           {recipes.map(recipe => (
             <RecipeCard key={recipe._id} recipe={recipe} />
           ))}
         </div>
-        
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          itemsPerPage={limit}
-          onPageChange={handlePageChange}
-        />
       </section>
+
+      {/* Category Sections */}
+      {['Appetizer', 'Meal', 'Beverages', 'Desserts'].map(category => (
+        <section key={category} className="section category-section">
+          <div className="section-header">
+            <h2>Top 10 {category}</h2>
+            <Link to={`/category/${category.toLowerCase()}`} className="view-all">
+              View All <FaArrowRight />
+            </Link>
+          </div>
+          <div className="recipes-grid horizontal-scroll">
+            {recipes
+              .filter(r => r.category === category)
+              .slice(0, 10)
+              .map(recipe => (
+                <RecipeCard key={recipe._id} recipe={recipe} />
+              ))}
+          </div>
+        </section>
+      ))}
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        itemsPerPage={limit}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };

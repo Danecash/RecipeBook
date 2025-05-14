@@ -10,7 +10,7 @@ const CategoryButtons = () => {
         <Link 
           key={category} 
           to={`/category/${category.toLowerCase()}`}
-          className="category-button"
+          className={`category-button ${category.toLowerCase()}`}
         >
           {category}
         </Link>
