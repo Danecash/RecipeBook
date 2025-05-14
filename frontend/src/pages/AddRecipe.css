@@ -1,0 +1,82 @@
+/* frontend/src/pages/AddRecipe.css */
+.add-recipe-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.add-recipe-container {
+  background-color: var(--white);
+  padding: var(--space-xl);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.recipe-form {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.array-field {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.array-field input,
+.array-field textarea {
+  flex: 1;
+}
+
+.remove-btn {
+  background-color: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.remove-btn:hover {
+  background-color: rgba(211, 47, 47, 0.1);
+}
+
+.add-btn {
+  background-color: transparent;
+  border: 1px solid var(--sage-green);
+  color: var(--sage-green);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: var(--space-sm);
+  width: fit-content;
+}
+
+.add-btn:hover {
+  background-color: rgba(138, 142, 117, 0.1);
+}
+
+.image-preview-container {
+  margin-top: var(--space-md);
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.submit-btn {
+  margin-top: var(--space-lg);
+}

@@ -1,0 +1,44 @@
+/* frontend/src/components/CategoryButtons.css */
+.category-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  margin: var(--space-xl) auto;
+  padding: 0 var(--space-md);
+  flex-wrap: wrap;
+}
+
+.category-button {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 20px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s;
+  font-family: var(--font-heading);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.category-button.appetizer {
+  background-color: var(--sage-green);
+  color: var(--light-cream);
+}
+
+.category-button.beverages {
+  background-color: var(--soft-green);
+  color: var(--dark-brown);
+}
+
+.category-button.desserts {
+  background-color: var(--warm-beige);
+  color: var(--dark-brown);
+}
+
+.category-button.meal {
+  background-color: var(--dark-brown);
+  color: var(--light-cream);
+}

@@ -10,46 +10,52 @@ import AddRecipe from './pages/AddRecipe';
 import RecipeDetail from './pages/RecipeDetail';
 import CategoryPage from './pages/CategoryPage';
 import SearchPage from './pages/SearchPage';
-import PopularRecipesPage from './pages/PopularRecipesPage'; // Add this import
+import PopularRecipesPage from './pages/PopularRecipesPage';
 import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AllRecipesPage from './pages/AllRecipesPage';
 import FindByIngredientsPage from './pages/FindByIngredientsPage';
-
+import './App.css'; // New global styles
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <ErrorBoundary>
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/favorites" element={<FavoritesPage />} />
-            <Route path="/add-recipe" element={<AddRecipe />} />
-            <Route path="/recipe/:id" element={<RecipeDetail />} />
-            <Route path="/category/:category" element={<CategoryPage />} />
-            <Route path="/search/:query" element={<SearchPage />} />
-            <Route path="/popular" element={<PopularRecipesPage />} /> {/* Add this route */}
-            <Route path="/all-recipes" element={<AllRecipesPage />} />
-            <Route path="/find-by-ingredients" element={<FindByIngredientsPage />} />
-          </Routes>
-          <ToastContainer 
-            position="bottom-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="colored"
-          />
+          <div className="app-container">
+            <Navbar />
+            <main className="main-content">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/favorites" element={<FavoritesPage />} />
+                <Route path="/add-recipe" element={<AddRecipe />} />
+                <Route path="/recipe/:id" element={<RecipeDetail />} />
+                <Route path="/category/:category" element={<CategoryPage />} />
+                <Route path="/search/:query" element={<SearchPage />} />
+                <Route path="/popular" element={<PopularRecipesPage />} />
+                <Route path="/all-recipes" element={<AllRecipesPage />} />
+                <Route path="/find-by-ingredients" element={<FindByIngredientsPage />} />
+              </Routes>
+            </main>
+            <ToastContainer 
+              position="bottom-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+              toastClassName="toast-message"
+              progressClassName="toast-progress"
+            />
+          </div>
         </ErrorBoundary>
       </Router>
     </AuthProvider>

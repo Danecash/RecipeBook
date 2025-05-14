@@ -1,17 +1,16 @@
-/* //frontend/src/index.css */
-
+/* frontend/src/index.css */
 :root {
-  /* Color Palette */
-  --primary: #FF6B6B;
-  --primary-dark: #e05555;
-  --secondary: #4ECDC4;
-  --secondary-dark: #3db8af;
-  --dark: #292F36;
-  --light: #F7FFF7;
-  --light-gray: #f0f0f0;
+  /* Serene Sage Color Palette */
+  --light-cream: #F1EAD8;
+  --warm-beige: #D5C7AD;
+  --sage-green: #8A8E75;
+  --soft-green: #BEC5A4;
+  --dark-brown: #68604D;
+
+  /* Additional colors */
   --white: #FFFFFF;
-  --accent: #FFE66D;
-  --error: #ef476f;
+  --error: #D32F2F;
+  --success: #388E3C;
 
   /* Spacing */
   --space-xs: 0.25rem;
@@ -34,13 +33,14 @@
 body {
   font-family: var(--font-main);
   line-height: 1.6;
-  background-color: var(--light);
-  color: var(--dark);
+  background-color: var(--light-cream);
+  color: var(--dark-brown);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   margin-bottom: var(--space-md);
+  color: var(--sage-green);
 }
 
 a {
@@ -64,41 +64,45 @@ a {
   cursor: pointer;
   transition: all 0.3s ease;
   border: none;
+  font-family: var(--font-heading);
 }
 
 .btn-primary {
-  background-color: var(--primary);
-  color: var(--white);
+  background-color: var(--sage-green);
+  color: var(--light-cream);
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
+  background-color: var(--dark-brown);
 }
 
 .btn-secondary {
-  background-color: var(--secondary);
-  color: var(--white);
+  background-color: var(--soft-green);
+  color: var(--dark-brown);
 }
 
 .btn-secondary:hover {
-  background-color: var(--secondary-dark);
+  background-color: var(--sage-green);
 }
 
-.btn-outline {
-  background-color: transparent;
-  border: 1px solid var(--primary);
-  color: var(--primary);
+/* Forms */
+input, textarea, select {
+  padding: var(--space-sm);
+  border: 1px solid var(--warm-beige);
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: var(--light-cream);
+  color: var(--dark-brown);
 }
 
-.btn-outline:hover {
-  background-color: var(--primary);
-  color: var(--white);
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--sage-green);
+  box-shadow: 0 0 0 2px rgba(138, 142, 117, 0.2);
 }
 
 /* Utility Classes */
-.text-center {
-  text-align: center;
-}
+.text-center { text-align: center; }
 
 .mt-sm { margin-top: var(--space-sm); }
 .mt-md { margin-top: var(--space-md); }
@@ -120,9 +124,9 @@ a {
   display: inline-block;
   width: 2rem;
   height: 2rem;
-  border: 3px solid rgba(255,255,255,0.3);
+  border: 3px solid rgba(104, 96, 77, 0.3);
   border-radius: 50%;
-  border-top-color: var(--white);
+  border-top-color: var(--dark-brown);
   animation: spin 1s ease-in-out infinite;
 }
 
