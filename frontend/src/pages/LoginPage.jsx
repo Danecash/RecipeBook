@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaUser, FaLock, FaGoogle, FaFacebook } from 'react-icons/fa';
+import './LoginPage.css';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -28,10 +29,10 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
+    <div className="login-page">
+      <div className="login-container">
         {/* Logo */}
-        <div className="auth-logo">
+        <div className="login-logo">
           <span className="logo-icon">🍳</span>
           <span className="logo-text">RecipeBook</span>
         </div>
@@ -40,7 +41,7 @@ const LoginPage = () => {
         
         {error && <div className="error-message">{error}</div>}
         
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group with-icon">
             <FaUser className="input-icon" />
             <input
@@ -71,11 +72,11 @@ const LoginPage = () => {
             <a href="#" className="forgot-password">Forgot password?</a>
           </div>
           
-          <button type="submit" disabled={loading} className="btn btn-primary auth-submit">
+          <button type="submit" disabled={loading} className="btn btn-primary login-submit">
             {loading ? 'Logging in...' : 'Login'}
           </button>
           
-          <div className="auth-divider">
+          <div className="login-divider">
             <span>Or login with</span>
           </div>
           
@@ -88,7 +89,7 @@ const LoginPage = () => {
             </button>
           </div>
           
-          <p className="auth-link">
+          <p className="login-link">
             Don't have an account? <a href="/register">Sign Up</a>
           </p>
         </form>

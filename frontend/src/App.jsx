@@ -11,13 +11,13 @@ import CategoryPage from './pages/CategoryPage';
 import SearchPage from './pages/SearchPage';
 import PopularRecipesPage from './pages/PopularRecipesPage';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AllRecipesPage from './pages/AllRecipesPage';
 import FindByIngredientsPage from './pages/FindByIngredientsPage';
-import Footer from './components/Footer'; // New footer component
-import './styles/main.css'; // Updated global styles
+import './styles/main.css';
 
 function App() {
   return (

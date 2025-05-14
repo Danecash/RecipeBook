@@ -1,0 +1,49 @@
+/* frontend/src/components/SectionHeader.css */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.section-header__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.section-header__subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
+.section-header__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.section-header__arrow:hover {
+  background-color: var(--primary-dark);
+  transform: translateX(5px);
+}
+
+.section-header__arrow-icon {
+  font-size: 1rem;
+}

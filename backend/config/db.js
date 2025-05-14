@@ -13,7 +13,6 @@ const connectDB = async () => {
     );
     console.log('🔗 Connecting to MongoDB:', maskedURI);
 
-    // Connection options
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -34,7 +33,6 @@ const connectDB = async () => {
     console.log(`   • Collections: ${Object.keys(conn.connection.collections).length}`);
     console.log(`   • Ready State: ${conn.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
 
-    // Connection event listeners
     mongoose.connection.on('connected', () => {
       console.log('Mongoose connected to DB');
     });
@@ -53,7 +51,6 @@ const connectDB = async () => {
     console.error('   • Error Code:', error.code || 'N/A');
     console.error('   • Reason:', error.reason || 'Unknown');
 
-    // More specific error handling
     if (error.name === 'MongoServerSelectionError') {
       console.error('   • Solution: Check your internet connection and MongoDB Atlas IP whitelist');
       console.error('   • Action: Whitelist your current IP in MongoDB Atlas dashboard');

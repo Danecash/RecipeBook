@@ -1,4 +1,4 @@
-//backend/utils/upload.js
+// backend/utils/upload.js
 
 const multer = require("multer");
 const path = require("path");
@@ -28,5 +28,34 @@ const upload = multer({
   fileFilter,
   limits: { fileSize: 15 * 1024 * 1024 } // 15MB
 });
+
+// Check if sharp is available
+let sharp;
+try {
+  sharp = require('sharp');
+  
+  // Image optimization function
+  upload.optimize = async (filePath) => {
+    try {
+      const optimizedPath = filePath + '-optimized.jpg';
+      
+      await sharp(filePath)
+        .resize(800, 800, {
+          fit: 'cover',
+          position: 'center'
+        })
+        .jpeg({ quality: 80 })
+        .toFile(optimizedPath);
+      
+      return optimizedPath;
+    } catch (error) {
+      console.error('Error optimizing image:', error);
+      return filePath; // Fallback to original
+    }
+  };
+} catch (sharpError) {
+  console.warn('Sharp module not found, image optimization disabled');
+  upload.optimize = async (filePath) => filePath; // No optimization
+}
 
 module.exports = upload;

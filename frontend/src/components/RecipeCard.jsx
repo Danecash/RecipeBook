@@ -4,6 +4,7 @@ import RecipeImage from './RecipeImage';
 import FavoriteButton from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
 import { FaHeart, FaStar, FaComment } from 'react-icons/fa';
+import './RecipeCard.css';
 
 const RecipeCard = ({
   recipe,

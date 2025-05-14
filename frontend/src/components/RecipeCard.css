@@ -122,41 +122,6 @@
   align-items: center;
 }
 
-.favorite-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.25rem;
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  color: var(--warm-beige);
-}
-
-.favorite-btn.favorited {
-  color: var(--error);
-}
-
-.favorite-btn:hover {
-  transform: scale(1.1);
-}
-
-.remove-btn {
-  background-color: transparent;
-  border: 1px solid var(--error);
-  color: var(--error);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: 4px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.remove-btn:hover {
-  background-color: rgba(211, 47, 47, 0.1);
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .recipe-card {

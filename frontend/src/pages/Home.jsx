@@ -1,41 +1,53 @@
 // frontend/src/pages/Home.jsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getRecipes } from '../services/api';
+import { getRecipes, getPopularRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
-import Pagination from '../components/Pagination';
-import CategoryButtons from '../components/CategoryButtons';
-import { FaFire, FaSearch, FaArrowRight } from 'react-icons/fa';
+import SectionHeader from '../components/SectionHeader';
+import { FaFire, FaArrowRight, FaSearch } from 'react-icons/fa';
+import './Home.css';
 
 const Home = () => {
-  const [recipes, setRecipes] = useState([]);
+  const [featuredRecipes, setFeaturedRecipes] = useState([]);
+  const [popularRecipes, setPopularRecipes] = useState([]);
+  const [categoryRecipes, setCategoryRecipes] = useState({});
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const limit = 8;
 
   useEffect(() => {
-    const fetchRecipes = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await getRecipes(currentPage, limit);
-        setRecipes(response.data.data);
-        setTotalPages(response.data.pagination.totalPages);
-        setTotalItems(response.data.pagination.totalItems);
+        
+        // Fetch featured recipes (most recent)
+        const featuredResponse = await getRecipes(1, 8);
+        setFeaturedRecipes(featuredResponse.data.data);
+        
+        // Fetch popular recipes
+        const popularResponse = await getPopularRecipes(1, 10);
+        setPopularRecipes(popularResponse.data);
+        
+        // Fetch recipes by category
+        const categories = ['Appetizer', 'Meal', 'Beverages', 'Desserts'];
+        const categoryPromises = categories.map(category => 
+          getRecipes(1, 10, { category })
+        );
+        
+        const categoryResults = await Promise.all(categoryPromises);
+        const categoryData = {};
+        categories.forEach((category, index) => {
+          categoryData[category] = categoryResults[index].data.data;
+        });
+        
+        setCategoryRecipes(categoryData);
       } catch (error) {
-        console.error('Error fetching recipes:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchRecipes();
-  }, [currentPage]);
-
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    
+    fetchData();
+  }, []);
 
   if (loading) return <div className="loading">Loading recipes...</div>;
 
@@ -55,23 +67,32 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Category Buttons */}
-      <CategoryButtons />
-
       {/* Featured Recipes */}
       <section className="section featured-recipes">
-        <div className="section-header">
-          <h2>
-            <FaFire className="section-icon" />
-            Featured Recipes
-          </h2>
-          <Link to="/popular" className="view-all">
-            View All <FaArrowRight />
-          </Link>
-        </div>
+        <SectionHeader 
+          title="Featured Recipes" 
+          icon={<FaFire />}
+          link="/all-recipes"
+          linkText="View All"
+        />
         <div className="recipes-grid">
-          {recipes.map(recipe => (
+          {featuredRecipes.map(recipe => (
             <RecipeCard key={recipe._id} recipe={recipe} />
+          ))}
+        </div>
+      </section>
+
+      {/* Popular Recipes */}
+      <section className="section popular-recipes">
+        <SectionHeader 
+          title="Popular Recipes" 
+          icon={<FaFire />}
+          link="/popular"
+          linkText="View All"
+        />
+        <div className="recipes-grid">
+          {popularRecipes.map(recipe => (
+            <RecipeCard key={recipe._id} recipe={recipe} showStats={true} />
           ))}
         </div>
       </section>
@@ -79,30 +100,18 @@ const Home = () => {
       {/* Category Sections */}
       {['Appetizer', 'Meal', 'Beverages', 'Desserts'].map(category => (
         <section key={category} className="section category-section">
-          <div className="section-header">
-            <h2>Top 10 {category}</h2>
-            <Link to={`/category/${category.toLowerCase()}`} className="view-all">
-              View All <FaArrowRight />
-            </Link>
-          </div>
+          <SectionHeader 
+            title={`Top 10 ${category}`}
+            link={`/category/${category.toLowerCase()}`}
+            linkText="View All"
+          />
           <div className="recipes-grid horizontal-scroll">
-            {recipes
-              .filter(r => r.category === category)
-              .slice(0, 10)
-              .map(recipe => (
-                <RecipeCard key={recipe._id} recipe={recipe} />
-              ))}
+            {categoryRecipes[category]?.map(recipe => (
+              <RecipeCard key={recipe._id} recipe={recipe} />
+            ))}
           </div>
         </section>
       ))}
-
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={totalItems}
-        itemsPerPage={limit}
-        onPageChange={handlePageChange}
-      />
     </div>
   );
 };
