@@ -1,0 +1,110 @@
+/* frontend/src/components/Footer.css */
+.footer {
+  background-color: var(--dark-brown);
+  color: var(--light-cream);
+  padding: var(--space-xl) 0;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.footer-logo-icon {
+  font-size: 2rem;
+}
+
+.footer-logo-text {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.footer-about p {
+  margin-bottom: var(--space-md);
+  line-height: 1.6;
+}
+
+.footer-links h3,
+.footer-contact h3 {
+  color: var(--light-cream);
+  margin-bottom: var(--space-md);
+  font-size: 1.25rem;
+}
+
+.footer-links ul {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: var(--space-sm);
+}
+
+.footer-links a {
+  color: var(--light-cream);
+  transition: color var(--transition-fast);
+  display: inline-block;
+  padding: var(--space-xs) 0;
+}
+
+.footer-links a:hover {
+  color: var(--soft-green);
+}
+
+.footer-contact p {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.footer-social {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.footer-social a {
+  color: var(--light-cream);
+  font-size: 1.5rem;
+  transition: color var(--transition-fast);
+}
+
+.footer-social a:hover {
+  color: var(--soft-green);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: var(--space-xl);
+  margin-top: var(--space-xl);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+  
+  .footer {
+    padding: var(--space-lg) 0;
+  }
+  
+  .footer-bottom {
+    padding-top: var(--space-lg);
+    margin-top: var(--space-lg);
+  }
+}

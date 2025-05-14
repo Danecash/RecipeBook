@@ -1,5 +1,4 @@
 // frontend/src/App.jsx
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
@@ -17,14 +16,15 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AllRecipesPage from './pages/AllRecipesPage';
 import FindByIngredientsPage from './pages/FindByIngredientsPage';
-import './App.css'; // New global styles
+import Footer from './components/Footer'; // New footer component
+import './styles/main.css'; // Updated global styles
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <ErrorBoundary>
-          <div className="app-container">
+          <div className="app-layout">
             <Navbar />
             <main className="main-content">
               <Routes>
@@ -41,6 +41,7 @@ function App() {
                 <Route path="/find-by-ingredients" element={<FindByIngredientsPage />} />
               </Routes>
             </main>
+            <Footer />
             <ToastContainer 
               position="bottom-right"
               autoClose={3000}

@@ -190,31 +190,7 @@ router.put("/recipes/:id", upload.single('image'), validateRecipeData, async (re
   }
 });
 
-// OPTIMIZE images (Admin)
-router.get("/optimize-images", async (req, res) => {
-  try {
-    const recipes = await Recipe.find({
-      image: { $exists: true },
-      imageOptimized: { $exists: false }
-    });
 
-    const updates = recipes.map(recipe =>
-      Recipe.updateOne(
-        { _id: recipe._id },
-        { $set: { imageOptimized: `${recipe.image}?w=800&h=600&fit=cover` } }
-      )
-    );
-
-    await Promise.all(updates);
-    res.json({
-      success: true,
-      message: `${updates.length} images optimized`
-    });
-  } catch (error) {
-    console.error("GET /optimize-images error:", error);
-    res.status(500).json(serverError(error));
-  }
-});
 
 // DELETE recipe
 router.delete("/recipes/:id", async (req, res) => {
@@ -629,6 +605,43 @@ router.get("/recipes/by-ingredients", async (req, res) => {
       error: "Internal server error",
       details: error.message
     });
+  }
+});
+
+// OPTIMIZE images (Admin)
+router.get("/optimize-images", async (req, res) => {
+  try {
+    const recipes = await Recipe.find({
+      image: { $exists: true },
+      $or: [
+        { imageOptimized: { $exists: false } },
+        { imageOptimized: { $regex: /\/backend\/uploads/ } }
+      ]
+    });
+
+    const updates = recipes.map(recipe => {
+      let optimizedPath = recipe.image;
+      
+      // If image is from uploads directory, add optimization parameters
+      if (recipe.image.startsWith('/backend/uploads/')) {
+        optimizedPath = `${recipe.image}?w=800&h=600&fit=cover`;
+      }
+      
+      return Recipe.updateOne(
+        { _id: recipe._id },
+        { $set: { imageOptimized: optimizedPath } }
+      );
+    });
+
+    await Promise.all(updates);
+    res.json({
+      success: true,
+      message: `${updates.length} images optimized`,
+      optimized: updates.length
+    });
+  } catch (error) {
+    console.error("GET /optimize-images error:", error);
+    res.status(500).json(serverError(error));
   }
 });
 
