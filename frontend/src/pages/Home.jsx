@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { getRecipes, getPopularRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import SectionHeader from '../components/SectionHeader';
-import { FaFire, FaArrowRight, FaSearch } from 'react-icons/fa';
+import { FaFire, FaArrowRight } from 'react-icons/fa';
 import './Home.css';
 
 const Home = () => {
@@ -20,11 +20,11 @@ const Home = () => {
         
         // Fetch featured recipes (most recent)
         const featuredResponse = await getRecipes(1, 8);
-        setFeaturedRecipes(featuredResponse.data.data);
+        setFeaturedRecipes(featuredResponse.data.data || []);
         
         // Fetch popular recipes
         const popularResponse = await getPopularRecipes(1, 10);
-        setPopularRecipes(popularResponse.data);
+        setPopularRecipes(popularResponse.data || []);
         
         // Fetch recipes by category
         const categories = ['Appetizer', 'Meal', 'Beverages', 'Desserts'];
@@ -35,7 +35,7 @@ const Home = () => {
         const categoryResults = await Promise.all(categoryPromises);
         const categoryData = {};
         categories.forEach((category, index) => {
-          categoryData[category] = categoryResults[index].data.data;
+          categoryData[category] = categoryResults[index].data.data || [];
         });
         
         setCategoryRecipes(categoryData);
@@ -58,12 +58,6 @@ const Home = () => {
         <div className="hero-content">
           <h1>Discover Delicious Recipes</h1>
           <p>Find your next favorite meal from our curated collection</p>
-          <div className="search-container">
-            <input type="text" placeholder="Search recipes..." />
-            <button className="search-btn">
-              <FaSearch />
-            </button>
-          </div>
         </div>
       </section>
 
@@ -101,7 +95,7 @@ const Home = () => {
       {['Appetizer', 'Meal', 'Beverages', 'Desserts'].map(category => (
         <section key={category} className="section category-section">
           <SectionHeader 
-            title={`Top 10 ${category}`}
+            title={`Top ${category}`}
             link={`/category/${category.toLowerCase()}`}
             linkText="View All"
           />
