@@ -1,12 +1,9 @@
-// frontend/src/AllRecipesPage.jsx
-
 import { useEffect, useState } from 'react';
 import { getAllRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
 import { useNavigate } from 'react-router-dom';
-import { FaClock, FaCalendarAlt } from 'react-icons/fa';
-import '../pages/AllRecipesPage.css';
+import { FaCalendarAlt, FaClock } from 'react-icons/fa';
 
 const AllRecipesPage = () => {
   const [recipes, setRecipes] = useState([]);
@@ -23,7 +20,7 @@ const AllRecipesPage = () => {
       setLoading(true);
       setError(null);
       const response = await getAllRecipes(currentPage, limit);
-      
+
       if (response.success) {
         setRecipes(response.data);
         setTotalPages(response.pagination.totalPages);
@@ -33,7 +30,7 @@ const AllRecipesPage = () => {
       }
     } catch (error) {
       console.error('Failed to load recipes:', error);
-      setError(error.message);
+      setError(error.message || 'Failed to load recipes');
     } finally {
       setLoading(false);
     }
@@ -52,8 +49,8 @@ const AllRecipesPage = () => {
     if (days === 0) return 'Added today';
     if (days === 1) return 'Added yesterday';
     if (days < 7) return `Added ${days} days ago`;
-    if (days < 30) return `Added ${Math.floor(days/7)} weeks ago`;
-    return `Added ${Math.floor(days/30)} months ago`;
+    if (days < 30) return `Added ${Math.floor(days / 7)} weeks ago`;
+    return `Added ${Math.floor(days / 30)} months ago`;
   };
 
   if (loading) return <div className="loading">Loading recipes...</div>;
@@ -61,7 +58,7 @@ const AllRecipesPage = () => {
 
   return (
     <div className="page-container">
-      <div className="page-header">
+      <div className="all-header">
         <h1>All Recipes</h1>
         <p>Browse our complete collection of recipes</p>
       </div>
@@ -76,12 +73,13 @@ const AllRecipesPage = () => {
       ) : (
         <>
           <div className="recipes-grid">
-            {recipes.map(recipe => (
+            {recipes.map((recipe) => (
               <div key={recipe._id} className="recipe-card-wrapper">
                 <RecipeCard recipe={recipe} />
                 <div className="recipe-meta">
                   <span className="meta-item">
-                    <FaCalendarAlt /> {new Date(recipe.createdAt).toLocaleDateString()}
+                    <FaCalendarAlt />{' '}
+                    {new Date(recipe.createdAt).toLocaleDateString()}
                   </span>
                   <span className="meta-item">
                     <FaClock /> {getDurationText(recipe.daysSinceCreation)}

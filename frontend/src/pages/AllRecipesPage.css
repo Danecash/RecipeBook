@@ -4,12 +4,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+  background-color: #fdfaf6;
   text-align: center;
 }
 
-.page-header {
+.all-header {
   margin-bottom: 2rem;
+}
+
+.all-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #3e3e3e;
+}
+
+.all-header p {
+  font-size: 1.2rem;
+  color: #777;
 }
 
 .recipes-grid {
@@ -18,16 +31,83 @@
   gap: 2rem;
   width: 100%;
   max-width: 1200px;
+  padding: 1rem 0;
 }
 
 .recipe-card-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.recipe-card-wrapper:hover {
+  transform: translateY(-4px);
 }
 
 .recipe-meta {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
   color: #666;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.loading,
+.error,
+.empty-state {
+  text-align: center;
+  margin-top: 4rem;
+  color: #444;
+}
+
+.empty-state button.btn-primary {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  background-color: #7a6d51;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.empty-state button.btn-primary:hover {
+  background-color: #5f543f;
+}
+
+/* Responsive Tweaks */
+@media (max-width: 768px) {
+  .all-header h1 {
+    font-size: 2rem;
+  }
+
+  .all-header p {
+    font-size: 1rem;
+  }
+
+  .recipe-meta {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .recipes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
