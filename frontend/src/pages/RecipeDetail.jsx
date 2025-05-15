@@ -6,13 +6,25 @@ import {
   getRecipeById, 
   deleteRecipe,
   rateRecipe,
-  updateRecipe
+  updateRecipe,
+  getRelatedRecipes
 } from '../services/api';
 import FavoriteButton from '../components/FavoriteButton';
 import { useAuth } from '../context/AuthContext';
 import StarRating from '../components/StarRating';
 import RecipeForm from '../components/RecipeForm';
+import RecipeCard from '../components/RecipeCard';
 import { toast } from 'react-toastify';
+import { 
+  FaClock, 
+  FaUtensils, 
+  FaUsers, 
+  FaShare, 
+  FaPrint,
+  FaBookmark,
+  FaRegBookmark
+} from 'react-icons/fa';
+import './RecipeDetail.css';
 
 const RecipeDetail = () => {
   const { id } = useParams();
@@ -26,6 +38,9 @@ const RecipeDetail = () => {
   const [userRating, setUserRating] = useState(0);
   const [userReview, setUserReview] = useState('');
   const [isSavingReview, setIsSavingReview] = useState(false);
+  const [relatedRecipes, setRelatedRecipes] = useState([]);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [servings, setServings] = useState(1);
 
   const fetchRecipe = async () => {
     try {
@@ -34,6 +49,7 @@ const RecipeDetail = () => {
       if (!response.data) throw new Error('Recipe not found');
       
       setRecipe(response.data);
+      setServings(response.data.servings || 1);
       
       if (user) {
         const userReview = response.data.reviews?.find(
@@ -43,7 +59,12 @@ const RecipeDetail = () => {
           setUserRating(userReview.rating);
           setUserReview(userReview.comment || '');
         }
+        setIsBookmarked(response.data.bookmarks?.includes(user._id) || false);
       }
+
+      // Fetch related recipes
+      const relatedResponse = await getRelatedRecipes(id);
+      setRelatedRecipes(relatedResponse.data || []);
     } catch (error) {
       setError(error.message);
       toast.error('Failed to load recipe');
@@ -112,6 +133,38 @@ const RecipeDetail = () => {
     }
   };
 
+  const handleShare = async () => {
+    try {
+      await navigator.share({
+        title: recipe.name,
+        text: `Check out this recipe: ${recipe.name}`,
+        url: window.location.href,
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleBookmark = async () => {
+    try {
+      // Implement bookmark functionality
+      setIsBookmarked(!isBookmarked);
+      toast.success(isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks');
+    } catch (error) {
+      console.error('Error bookmarking:', error);
+      toast.error('Failed to update bookmarks');
+    }
+  };
+
+  const adjustServings = (newServings) => {
+    if (newServings < 1) return;
+    setServings(newServings);
+  };
+
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '/placeholder-recipe.jpg';
     if (imagePath.startsWith('http')) return imagePath;
@@ -153,6 +206,16 @@ const RecipeDetail = () => {
             </button>
           </>
         )}
+
+        <button onClick={handleShare} className="share-button">
+          <FaShare /> Share
+        </button>
+        <button onClick={handlePrint} className="print-button">
+          <FaPrint /> Print
+        </button>
+        <button onClick={handleBookmark} className="bookmark-button">
+          {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
+        </button>
       </div>
 
       {isEditing ? (
@@ -170,6 +233,21 @@ const RecipeDetail = () => {
             </span>
           </div>
 
+          <div className="recipe-meta-info">
+            <div className="meta-item">
+              <FaClock />
+              <span>{recipe.cookingTime || '30'} mins</span>
+            </div>
+            <div className="meta-item">
+              <FaUtensils />
+              <span>{recipe.difficulty || 'Medium'}</span>
+            </div>
+            <div className="meta-item">
+              <FaUsers />
+              <span>{recipe.servings || 4} servings</span>
+            </div>
+          </div>
+
           <div className="image-container">
             <img
               src={getImageUrl(recipe.imageOptimized || recipe.image)}
@@ -179,6 +257,12 @@ const RecipeDetail = () => {
               }}
               className="detail-image"
             />
+          </div>
+
+          <div className="servings-adjuster">
+            <button onClick={() => adjustServings(servings - 1)}>-</button>
+            <span>{servings} servings</span>
+            <button onClick={() => adjustServings(servings + 1)}>+</button>
           </div>
 
           <div className="rating-section">
@@ -219,9 +303,25 @@ const RecipeDetail = () => {
             <section className="ingredients">
               <h2>Ingredients</h2>
               <ul>
-                {recipe.ingredients.map((ingredient, i) => (
-                  <li key={i}>{ingredient}</li>
-                ))}
+                {recipe.ingredients && recipe.ingredients.map((ingredient, i) => {
+                  // Handle both string and object formats
+                  if (typeof ingredient === 'string') {
+                    return <li key={i}>{ingredient}</li>;
+                  } else {
+                    const amount = ingredient.amount || '';
+                    const unit = ingredient.unit || '';
+                    const name = ingredient.name || '';
+                    const adjustedAmount = amount && servings !== (recipe.servings || 4) ? 
+                      (amount * (servings / (recipe.servings || 4))).toFixed(1) : 
+                      amount;
+                    
+                    return (
+                      <li key={i}>
+                        {adjustedAmount} {unit} {name}
+                      </li>
+                    );
+                  }
+                })}
               </ul>
             </section>
 
@@ -255,6 +355,17 @@ const RecipeDetail = () => {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {relatedRecipes.length > 0 && (
+            <div className="related-recipes">
+              <h3>You May Also Like</h3>
+              <div className="recipes-grid">
+                {relatedRecipes.map(recipe => (
+                  <RecipeCard key={recipe._id} recipe={recipe} />
+                ))}
+              </div>
             </div>
           )}
         </>

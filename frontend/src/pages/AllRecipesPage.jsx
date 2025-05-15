@@ -1,12 +1,11 @@
 // frontend/src/AllRecipesPage.jsx
 
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getAllRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
-import Pagination from '../components/Pagination';
-import { useNavigate } from 'react-router-dom';
-import { FaClock, FaCalendarAlt } from 'react-icons/fa';
-import '../pages/AllRecipesPage.css';
+import { FaFilter, FaSort } from 'react-icons/fa';
+import './AllRecipesPage.css';
 
 const AllRecipesPage = () => {
   const [recipes, setRecipes] = useState([]);
@@ -14,26 +13,34 @@ const AllRecipesPage = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState('newest');
+  const [searchQuery, setSearchQuery] = useState('');
   const limit = 12;
-  const navigate = useNavigate();
+
+  const sortOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'rating', label: 'Highest Rated' },
+    { value: 'popular', label: 'Most Popular' }
+  ];
 
   const fetchAllRecipes = async () => {
     try {
       setLoading(true);
+      const response = await getAllRecipes(
+        currentPage, 
+        limit, 
+        searchQuery, 
+        'all', 
+        sortBy
+      );
+      setRecipes(response.data);
+      setTotalPages(response.pagination.totalPages);
       setError(null);
-      const response = await getAllRecipes(currentPage, limit);
-      
-      if (response.success) {
-        setRecipes(response.data);
-        setTotalPages(response.pagination.totalPages);
-        setTotalItems(response.pagination.totalItems);
-      } else {
-        throw new Error(response.error || 'Failed to load recipes');
-      }
-    } catch (error) {
-      console.error('Failed to load recipes:', error);
-      setError(error.message);
+    } catch (err) {
+      setError('Failed to fetch recipes. Please try again later.');
+      console.error('Error fetching recipes:', err);
     } finally {
       setLoading(false);
     }
@@ -41,64 +48,101 @@ const AllRecipesPage = () => {
 
   useEffect(() => {
     fetchAllRecipes();
-  }, [currentPage]);
+  }, [currentPage, sortBy, searchQuery]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   };
 
-  const getDurationText = (days) => {
-    if (days === 0) return 'Added today';
-    if (days === 1) return 'Added yesterday';
-    if (days < 7) return `Added ${days} days ago`;
-    if (days < 30) return `Added ${Math.floor(days/7)} weeks ago`;
-    return `Added ${Math.floor(days/30)} months ago`;
+  const handleSortChange = (e) => {
+    setSortBy(e.target.value);
+    setCurrentPage(1);
   };
 
-  if (loading) return <div className="loading">Loading recipes...</div>;
-  if (error) return <div className="error">{error}</div>;
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchAllRecipes();
+  };
+
+  if (loading && recipes.length === 0) {
+    return (
+      <div className="page-container">
+        <div className="loading">Loading recipes...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="page-container">
+        <div className="error">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container">
       <div className="page-header">
         <h1>All Recipes</h1>
-        <p>Browse our complete collection of recipes</p>
+        <div className="filter-toggle" onClick={() => setShowFilters(!showFilters)}>
+          <FaFilter /> {showFilters ? 'Hide Filters' : 'Show Filters'}
+        </div>
       </div>
 
-      {recipes.length === 0 ? (
-        <div className="empty-state">
-          <p>No recipes found</p>
-          <button onClick={() => navigate('/')} className="btn-primary">
-            Go to Home
+      <div className={`filters-section ${showFilters ? 'show' : ''}`}>
+        <form onSubmit={handleSearch} className="search-form">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search recipes..."
+            className="search-input"
+          />
+          <button type="submit" className="search-button">Search</button>
+        </form>
+
+        <div className="sort-controls">
+          <FaSort className="sort-icon" />
+          <select value={sortBy} onChange={handleSortChange} className="sort-select">
+            {sortOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="recipes-grid">
+        {recipes.map(recipe => (
+          <div key={recipe._id} className="recipe-card-wrapper">
+            <RecipeCard recipe={recipe} showStats={true} />
+          </div>
+        ))}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="pagination-btn"
+          >
+            Previous
+          </button>
+          <span className="page-info">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="pagination-btn"
+          >
+            Next
           </button>
         </div>
-      ) : (
-        <>
-          <div className="recipes-grid">
-            {recipes.map(recipe => (
-              <div key={recipe._id} className="recipe-card-wrapper">
-                <RecipeCard recipe={recipe} />
-                <div className="recipe-meta">
-                  <span className="meta-item">
-                    <FaCalendarAlt /> {new Date(recipe.createdAt).toLocaleDateString()}
-                  </span>
-                  <span className="meta-item">
-                    <FaClock /> {getDurationText(recipe.daysSinceCreation)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={totalItems}
-            itemsPerPage={limit}
-            onPageChange={handlePageChange}
-          />
-        </>
       )}
     </div>
   );

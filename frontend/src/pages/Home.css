@@ -1,6 +1,7 @@
 /* frontend/src/pages/Home.css */
 .home-page {
   padding-bottom: 4rem;
+  min-height: 100vh;
 }
 
 .hero-section {
@@ -32,9 +33,49 @@
   color: #fdfaf6;
 }
 
+.hero-search {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hero-search .search-bar {
+  display: flex;
+  gap: 1rem;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hero-search .search-bar input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.hero-search .search-bar button {
+  padding: 0.75rem 1.5rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.hero-search .search-bar button:hover {
+  background: #45a049;
+}
+
 .section {
-  margin-bottom: 3rem;
-  padding: 0 1rem;
+  padding: 3rem 2rem;
+}
+
+.section:nth-child(even) {
+  background-color: #f9f9f9;
 }
 
 .section-header {
@@ -71,8 +112,15 @@
 
 .recipes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
 }
 
 /* Show 5 cards per row on large screens */
@@ -109,5 +157,38 @@
 
   .hero-content p {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 3rem 1rem;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+  }
+
+  .hero-search .search-bar {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .hero-search .search-bar input,
+  .hero-search .search-bar button {
+    width: 100%;
+  }
+
+  .section {
+    padding: 2rem 1rem;
+  }
+
+  .recipes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
   }
 }

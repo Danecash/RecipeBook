@@ -441,36 +441,52 @@ router.get("/popular-recipes", async (req, res) => {
 
 // Add this new route
 router.get("/all-recipes", async (req, res) => {
+  console.log('QUERY RECEIVED:', req.query); // Debug log
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
+    const { search, category, sort } = req.query;
+
+    // Build query
+    const query = {};
+    if (search && typeof search === 'string' && search.trim() !== '') {
+      query.name = { $regex: search.trim(), $options: 'i' };
+    }
+    if (category && category !== 'all') {
+      query.category = category;
+    }
+
+    // Build sort options
+    let sortOptions = {};
+    switch (sort) {
+      case 'oldest':
+        sortOptions = { createdAt: 1 };
+        break;
+      case 'rating':
+        sortOptions = { averageRating: -1 };
+        break;
+      case 'popular':
+        sortOptions = { favoriteCount: -1 };
+        break;
+      default: // newest
+        sortOptions = { createdAt: -1 };
+    }
 
     const [recipes, total] = await Promise.all([
-      Recipe.find()
-        .sort({ createdAt: -1 }) // Sort by newest first
+      Recipe.find(query)
+        .sort(sortOptions)
         .skip(skip)
         .limit(limit)
-        .lean(),
-      Recipe.countDocuments()
+        .select('+imageOptimized')
+        .lean()
+        .transform(docs => docs.map(formatRecipeImage)),
+      Recipe.countDocuments(query)
     ]);
-
-    // Add time since creation to each recipe
-    const recipesWithDuration = recipes.map(recipe => {
-      const createdAt = new Date(recipe.createdAt);
-      const now = new Date();
-      const diffTime = Math.abs(now - createdAt);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-      
-      return {
-        ...recipe,
-        daysSinceCreation: diffDays
-      };
-    });
 
     res.json({
       success: true,
-      data: recipesWithDuration,
+      data: recipes,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(total / limit),
@@ -479,12 +495,8 @@ router.get("/all-recipes", async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Error fetching all recipes:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch recipes",
-      details: error.message
-    });
+    console.error("GET /all-recipes error:", error);
+    res.status(500).json(serverError(error));
   }
 });
 
@@ -657,6 +669,64 @@ router.post("/recipes", upload.single('image'), validateRecipeData, async (req, 
   } catch (error) {
     console.error("POST /recipes error:", error);
     if (req.file?.path) fs.unlink(req.file.path, () => {});
+    res.status(500).json(serverError(error));
+  }
+});
+
+// Get related recipes
+router.get("/recipes/:id/related", async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    // Find recipes in the same category, excluding the current recipe
+    const relatedRecipes = await Recipe.find({
+      category: recipe.category,
+      _id: { $ne: recipe._id }
+    })
+    .sort({ favoriteCount: -1, averageRating: -1 })
+    .limit(4)
+    .select('+imageOptimized')
+    .lean()
+    .transform(docs => docs.map(formatRecipeImage));
+
+    res.json({
+      success: true,
+      data: relatedRecipes
+    });
+  } catch (error) {
+    console.error("GET /recipes/:id/related error:", error);
+    res.status(500).json(serverError(error));
+  }
+});
+
+// Toggle bookmark
+router.post("/recipes/:id/bookmark", protect, async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    const user = await User.findById(req.user._id);
+    const bookmarkIndex = user.bookmarks.indexOf(recipe._id);
+
+    if (bookmarkIndex === -1) {
+      user.bookmarks.push(recipe._id);
+    } else {
+      user.bookmarks.splice(bookmarkIndex, 1);
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      isBookmarked: bookmarkIndex === -1
+    });
+  } catch (error) {
+    console.error("POST /recipes/:id/bookmark error:", error);
     res.status(500).json(serverError(error));
   }
 });

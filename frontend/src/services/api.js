@@ -150,12 +150,11 @@ export const getPopularRecipes = async (page = 1, limit = 10) => {
   }
 };
 
-export const getAllRecipes = async (page = 1, limit = 12) => {
+export const getAllRecipes = async (page = 1, limit = 12, search = '', category = 'all', sort = 'newest') => {
   try {
     const response = await api.get('/all-recipes', {
-      params: { page, limit }
+      params: { page, limit, search, category, sort }
     });
-
     return response.data;
   } catch (error) {
     console.error('Error fetching all recipes:', error);
@@ -199,6 +198,24 @@ export const searchRecipesByIngredients = async (ingredients, page = 1, limit = 
     }
     
     throw new Error(error.response?.data?.error || 'Failed to search recipes');
+  }
+};
+
+export const getRelatedRecipes = async (recipeId) => {
+  try {
+    const response = await api.get(`/recipes/${recipeId}/related`);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
+  }
+};
+
+export const toggleBookmark = async (recipeId) => {
+  try {
+    const response = await api.post(`/recipes/${recipeId}/bookmark`);
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error);
   }
 };
 
