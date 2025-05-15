@@ -1,10 +1,9 @@
 // frontend/src/pages/Home.jsx
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
 import { getRecipes, getPopularRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import SectionHeader from '../components/SectionHeader';
-import { FaFire, FaArrowRight } from 'react-icons/fa';
+import { FaFire, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import './Home.css';
 
 const Home = () => {
@@ -12,32 +11,30 @@ const Home = () => {
   const [popularRecipes, setPopularRecipes] = useState([]);
   const [categoryRecipes, setCategoryRecipes] = useState({});
   const [loading, setLoading] = useState(true);
+  const scrollRefs = useRef({});
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch featured recipes (most recent)
+
         const featuredResponse = await getRecipes(1, 8);
         setFeaturedRecipes(featuredResponse.data.data || []);
-        
-        // Fetch popular recipes
+
         const popularResponse = await getPopularRecipes(1, 10);
         setPopularRecipes(popularResponse.data || []);
-        
-        // Fetch recipes by category
+
         const categories = ['Appetizer', 'Meal', 'Beverages', 'Desserts'];
-        const categoryPromises = categories.map(category => 
+        const categoryPromises = categories.map(category =>
           getRecipes(1, 10, { category })
         );
-        
+
         const categoryResults = await Promise.all(categoryPromises);
         const categoryData = {};
         categories.forEach((category, index) => {
           categoryData[category] = categoryResults[index].data.data || [];
         });
-        
+
         setCategoryRecipes(categoryData);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -45,9 +42,20 @@ const Home = () => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, []);
+
+  const scroll = (category, direction) => {
+    const container = scrollRefs.current[category];
+    if (container) {
+      const scrollAmount = 300;
+      container.scrollBy({
+        left: direction === 'right' ? scrollAmount : -scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   if (loading) return <div className="loading">Loading recipes...</div>;
 
@@ -62,13 +70,8 @@ const Home = () => {
       </section>
 
       {/* Featured Recipes */}
-      <section className="section featured-recipes">
-        <SectionHeader 
-          title="Featured Recipes" 
-          icon={<FaFire />}
-          link="/all-recipes"
-          linkText="View All"
-        />
+      <section className="section">
+        <SectionHeader title="Featured Recipes" link="/all-recipes" />
         <div className="recipes-grid">
           {featuredRecipes.map(recipe => (
             <RecipeCard key={recipe._id} recipe={recipe} />
@@ -77,13 +80,8 @@ const Home = () => {
       </section>
 
       {/* Popular Recipes */}
-      <section className="section popular-recipes">
-        <SectionHeader 
-          title="Popular Recipes" 
-          icon={<FaFire />}
-          link="/popular"
-          linkText="View All"
-        />
+      <section className="section">
+        <SectionHeader title="Popular Recipes" icon={<FaFire />} link="/popular" />
         <div className="recipes-grid">
           {popularRecipes.map(recipe => (
             <RecipeCard key={recipe._id} recipe={recipe} showStats={true} />
@@ -93,16 +91,29 @@ const Home = () => {
 
       {/* Category Sections */}
       {['Appetizer', 'Meal', 'Beverages', 'Desserts'].map(category => (
-        <section key={category} className="section category-section">
-          <SectionHeader 
-            title={`Top ${category}`}
-            link={`/category/${category.toLowerCase()}`}
-            linkText="View All"
-          />
-          <div className="recipes-grid horizontal-scroll">
-            {categoryRecipes[category]?.map(recipe => (
-              <RecipeCard key={recipe._id} recipe={recipe} />
-            ))}
+        <section key={category} className="section">
+          <SectionHeader title={`Top 10 ${category}`} link={`/category/${category.toLowerCase()}`} />
+          
+          <div className="horizontal-scroll-wrapper">
+            <button className="scroll-btn left" onClick={() => scroll(category, 'left')}>
+              <FaChevronLeft />
+            </button>
+
+            <div
+              className="recipes-horizontal-scroll"
+              ref={(el) => (scrollRefs.current[category] = el)}
+            >
+              {categoryRecipes[category]?.map((recipe, index) => (
+                <div key={recipe._id} className="recipe-card-wrapper">
+                  <span className="recipe-rank">{index + 1}</span>
+                  <RecipeCard recipe={recipe} />
+                </div>
+              ))}
+            </div>
+
+            <button className="scroll-btn right" onClick={() => scroll(category, 'right')}>
+              <FaChevronRight />
+            </button>
           </div>
         </section>
       ))}

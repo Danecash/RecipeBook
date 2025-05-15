@@ -1,84 +1,60 @@
 // frontend/src/pages/CategoryPage.jsx
 import { useEffect, useState } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getRecipesByCategory } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
+import './CategoryPage.css';
 
 const CategoryPage = () => {
   const { category } = useParams();
-  const location = useLocation();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const limit = 12;
-
-  // Reset to page 1 when category changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [category]);
+  const limit = 10;
 
   useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
     const fetchRecipes = async () => {
       try {
         setLoading(true);
-        const response = await getRecipesByCategory(
-          category, 
-          currentPage, 
-          limit,
-          { signal } // Pass abort signal
-        );
-
-        if (!signal.aborted) {
-          setRecipes(response.data.data);
-          setTotalPages(response.data.pagination.totalPages);
-          setTotalItems(response.data.pagination.totalItems);
-        }
+        const response = await getRecipesByCategory(category, currentPage, limit);
+        setRecipes(response.data.data || []);
+        setTotalPages(response.data.pagination?.totalPages || 1);
+        setTotalItems(response.data.pagination?.totalItems || 0);
       } catch (error) {
-        if (!signal.aborted) {
-          console.error("Error fetching recipes:", error);
-        }
+        console.error("Error fetching recipes:", error);
       } finally {
-        if (!signal.aborted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     fetchRecipes();
-
-    return () => controller.abort();
-  }, [category, currentPage, location.key]);
+  }, [category, currentPage]);
 
   const handlePageChange = (newPage) => {
-    if (newPage !== currentPage) {
-      setCurrentPage(newPage);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) return <div className="loading">Loading {category} recipes...</div>;
 
   return (
     <div className="category-page">
-      <h1>{category} Recipes</h1>
-      <Link to="/" className="back-link">← Back to All Recipes</Link>
+      <h1 className="category-title">Top {category} Recipes</h1>
+      <Link to="/" className="back-link">← Back to Home</Link>
 
       {recipes.length === 0 ? (
         <p>No recipes found in this category.</p>
       ) : (
         <>
-          <div className="recipes-grid">
-            {recipes.map(recipe => (
-              <RecipeCard 
-                key={`${recipe._id}-${currentPage}`} 
-                recipe={recipe} 
-              />
+          <div className="ranked-recipes">
+            {recipes.map((recipe, index) => (
+              <div key={recipe._id} className="ranked-recipe">
+                <span className="recipe-rank">{(currentPage - 1) * limit + index + 1}</span>
+                <RecipeCard recipe={recipe} />
+              </div>
             ))}
           </div>
 
