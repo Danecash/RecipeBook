@@ -1,5 +1,3 @@
-// frontend/src/pages/FavoritesPage.jsx
-
 import { useEffect, useState } from 'react';
 import { getFavorites, toggleFavorite } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
@@ -7,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import Pagination from '../components/Pagination';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import './FavoritesPage.css';
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState([]);
@@ -16,22 +15,20 @@ const FavoritesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const limit = 10; // Changed to 10 recipes per page
+  const limit = 10;
   const navigate = useNavigate();
 
   const fetchFavorites = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       if (!user) {
         navigate('/login');
         return;
       }
 
       const response = await getFavorites(currentPage, limit);
-      console.log('Favorites response:', response); // Debug log
-      
       if (response.success) {
         setFavorites(response.data || []);
         setTotalPages(response.pagination?.totalPages || 1);
@@ -55,19 +52,17 @@ const FavoritesPage = () => {
   const handleRemoveFavorite = async (recipeId) => {
     try {
       await toggleFavorite(recipeId);
-      // Optimistic update
       setFavorites(prev => prev.filter(recipe => recipe._id !== recipeId));
       setTotalItems(prev => prev - 1);
       toast.success('Removed from favorites');
-      
-      // Go back a page if we removed the last item on the page
+
       if (favorites.length === 1 && currentPage > 1) {
         setCurrentPage(prev => prev - 1);
       }
     } catch (error) {
       console.error('Failed to remove favorite:', error);
       toast.error('Failed to remove from favorites');
-      fetchFavorites(); // Refresh data if something went wrong
+      fetchFavorites();
     }
   };
 
@@ -80,29 +75,29 @@ const FavoritesPage = () => {
   if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className="page-container">
-      <h1>Your Favorite Recipes ({totalItems})</h1>
-      
+    <div className="favorites-page">
+      <h1 className="favorites-title">Your Favorite Recipes ({totalItems})</h1>
+      <button onClick={() => navigate('/')} className="back-link">← Back to Home</button>
+
       {favorites.length === 0 ? (
         <div className="empty-state">
           <p>You haven't favorited any recipes yet</p>
-          <button 
-            onClick={() => navigate('/')}
-            className="btn-primary"
-          >
+          <button onClick={() => navigate('/')} className="btn-primary">
             Browse Recipes
           </button>
         </div>
       ) : (
         <>
-          <div className="recipes-grid">
-            {favorites.map(recipe => (
-              <RecipeCard 
-                key={`${recipe._id}-${currentPage}`}
-                recipe={recipe}
-                showRemoveButton={true}
-                onRemove={() => handleRemoveFavorite(recipe._id)}
-              />
+          <div className="ranked-recipes">
+            {favorites.map((recipe, index) => (
+              <div key={recipe._id} className="ranked-recipe">
+                <span className="recipe-rank">{(currentPage - 1) * limit + index + 1}</span>
+                <RecipeCard 
+                  recipe={recipe} 
+                  showRemoveButton={true} 
+                  onRemove={() => handleRemoveFavorite(recipe._id)} 
+                />
+              </div>
             ))}
           </div>
 

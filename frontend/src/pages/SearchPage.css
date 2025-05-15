@@ -1,0 +1,23 @@
+/* src/styles/SearchPage.css */
+
+.search-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 2rem;
+}
+
+.loading {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+}

@@ -1,9 +1,9 @@
 // frontend/src/pages/Home.jsx
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { getRecipes, getPopularRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import SectionHeader from '../components/SectionHeader';
-import { FaFire, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaFire } from 'react-icons/fa';
 import './Home.css';
 
 const Home = () => {
@@ -11,7 +11,6 @@ const Home = () => {
   const [popularRecipes, setPopularRecipes] = useState([]);
   const [categoryRecipes, setCategoryRecipes] = useState({});
   const [loading, setLoading] = useState(true);
-  const scrollRefs = useRef({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,17 +45,6 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const scroll = (category, direction) => {
-    const container = scrollRefs.current[category];
-    if (container) {
-      const scrollAmount = 300;
-      container.scrollBy({
-        left: direction === 'right' ? scrollAmount : -scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
-
   if (loading) return <div className="loading">Loading recipes...</div>;
 
   return (
@@ -89,31 +77,14 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Category Sections */}
+      {/* Category Sections (no numbers, clean grid layout) */}
       {['Appetizer', 'Meal', 'Beverages', 'Desserts'].map(category => (
         <section key={category} className="section">
-          <SectionHeader title={`Top 10 ${category}`} link={`/category/${category.toLowerCase()}`} />
-          
-          <div className="horizontal-scroll-wrapper">
-            <button className="scroll-btn left" onClick={() => scroll(category, 'left')}>
-              <FaChevronLeft />
-            </button>
-
-            <div
-              className="recipes-horizontal-scroll"
-              ref={(el) => (scrollRefs.current[category] = el)}
-            >
-              {categoryRecipes[category]?.map((recipe, index) => (
-                <div key={recipe._id} className="recipe-card-wrapper">
-                  <span className="recipe-rank">{index + 1}</span>
-                  <RecipeCard recipe={recipe} />
-                </div>
-              ))}
-            </div>
-
-            <button className="scroll-btn right" onClick={() => scroll(category, 'right')}>
-              <FaChevronRight />
-            </button>
+          <SectionHeader title={`${category} Recipes`} link={`/category/${category.toLowerCase()}`} />
+          <div className="recipes-grid">
+            {categoryRecipes[category]?.map(recipe => (
+              <RecipeCard key={recipe._id} recipe={recipe} />
+            ))}
           </div>
         </section>
       ))}
@@ -122,3 +93,4 @@ const Home = () => {
 };
 
 export default Home;
+

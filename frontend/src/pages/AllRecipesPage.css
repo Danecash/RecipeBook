@@ -1,0 +1,33 @@
+/* src/styles/AllRecipesPage.css */
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.recipe-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.recipe-meta {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}

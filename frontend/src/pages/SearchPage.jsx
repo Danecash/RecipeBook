@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { searchRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
+import '../pages/SearchPage.css';
 
 const SearchPage = () => {
   const { query } = useParams();

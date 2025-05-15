@@ -6,6 +6,7 @@ import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
 import { useNavigate } from 'react-router-dom';
 import { FaClock, FaCalendarAlt } from 'react-icons/fa';
+import '../pages/AllRecipesPage.css';
 
 const AllRecipesPage = () => {
   const [recipes, setRecipes] = useState([]);

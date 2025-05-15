@@ -1,0 +1,79 @@
+.favorites-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.favorites-title {
+  color: var(--dark-brown);
+  margin-bottom: var(--space-sm);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: var(--space-xl);
+  color: var(--sage-green);
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.back-link:hover {
+  color: var(--dark-brown);
+}
+
+.empty-state {
+  text-align: center;
+  margin-top: var(--space-xl);
+}
+
+.ranked-recipes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+
+.ranked-recipe {
+  position: relative;
+}
+
+.recipe-rank {
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  background-color: var(--sage-green);
+  color: var(--light-cream);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  z-index: 1;
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 768px) {
+  .ranked-recipes {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .ranked-recipes {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-rank {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+}

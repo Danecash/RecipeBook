@@ -1,0 +1,54 @@
+/* src/styles/FindByIngredientsPage.css */
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.search-header {
+  max-width: 800px;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.ingredient-search-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ingredients-input-container {
+  width: 100%;
+}
+
+.ingredient-input-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.ingredient-input {
+  padding: 0.5rem;
+  width: 250px;
+}
+
+.add-ingredient-btn, .remove-ingredient-btn, .search-button {
+  margin-left: 0.5rem;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.results-info {
+  margin-bottom: 1rem;
+}

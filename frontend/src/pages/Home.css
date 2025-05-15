@@ -1,6 +1,6 @@
 /* frontend/src/pages/Home.css */
 .home-page {
-  padding-bottom: var(--space-xl);
+  padding-bottom: 4rem;
 }
 
 .hero-section {
@@ -8,59 +8,59 @@
               url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');
   background-size: cover;
   background-position: center;
-  color: var(--light-cream);
-  padding: var(--space-xxl) 0;
+  color: #fdfaf6;
+  padding: 4rem 0;
   text-align: center;
-  margin-bottom: var(--space-xl);
+  margin-bottom: 3rem;
 }
 
 .hero-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0 var(--space-md);
+  padding: 0 1rem;
 }
 
 .hero-content h1 {
   font-size: 2.5rem;
-  margin-bottom: var(--space-sm);
-  color: var(--light-cream);
+  margin-bottom: 1rem;
+  color: #fdfaf6;
 }
 
 .hero-content p {
   font-size: 1.2rem;
-  margin-bottom: var(--space-xl);
-  color: var(--light-cream);
+  margin-bottom: 2rem;
+  color: #fdfaf6;
 }
 
 .section {
-  margin-bottom: var(--space-xl);
-  padding: 0 var(--space-md);
+  margin-bottom: 3rem;
+  padding: 0 1rem;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-lg);
+  margin-bottom: 2rem;
 }
 
 .section-header h2 {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  color: var(--dark-brown);
+  gap: 0.5rem;
+  color: #5c4422;
   margin: 0;
 }
 
 .section-icon {
-  color: var(--sage-green);
+  color: #9cab7c;
 }
 
 .view-all {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  color: var(--sage-green);
+  gap: 0.25rem;
+  color: #9cab7c;
   font-weight: 500;
   text-decoration: none;
 }
@@ -69,98 +69,45 @@
   text-decoration: underline;
 }
 
-/* Recipes Grid Layout */
 .recipes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: var(--space-lg);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
 }
 
-/* Horizontal Scroll Layout */
-.horizontal-scroll-container {
-  overflow-x: auto;
-  padding-bottom: var(--space-md);
-  scrollbar-width: thin;
-  scrollbar-color: var(--warm-beige) var(--light-cream);
-}
-
-.horizontal-scroll-container::-webkit-scrollbar {
-  height: 8px;
-}
-
-.horizontal-scroll-container::-webkit-scrollbar-track {
-  background: var(--light-cream);
-}
-
-.horizontal-scroll-container::-webkit-scrollbar-thumb {
-  background-color: var(--warm-beige);
-  border-radius: 20px;
-}
-
-.recipes-horizontal-scroll {
-  display: flex;
-  gap: var(--space-lg);
-  padding-left: var(--space-sm);
-}
-
-.recipe-card-wrapper {
-  position: relative;
-  flex: 0 0 auto;
-  width: 250px;
-}
-
-/* Ranking Badge */
-.recipe-rank {
-  position: absolute;
-  top: -12px;
-  left: -12px;
-  background-color: var(--dark-brown);
-  color: var(--light-cream);
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  font-weight: bold;
-  z-index: 2;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .hero-content h1 {
-    font-size: 2rem;
+/* Show 5 cards per row on large screens */
+@media (min-width: 1280px) {
+  .recipes-grid {
+    grid-template-columns: repeat(5, 1fr);
   }
+}
 
-  .hero-content p {
-    font-size: 1rem;
+/* Adjust grid for medium screens (4 per row) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .recipes-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
+}
 
+/* Adjust grid for tablets (2–3 per row) */
+@media (max-width: 1023px) {
   .recipes-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
-
-  .recipe-card-wrapper {
-    width: 200px;
-  }
 }
 
+/* Mobile single column layout */
 @media (max-width: 480px) {
-  .hero-section {
-    padding: var(--space-xl) 0;
+  .recipes-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .hero-content h1 {
     font-size: 1.75rem;
   }
 
-  .recipes-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-md);
-  }
-
-  .recipe-card-wrapper {
-    width: 180px;
+  .hero-content p {
+    font-size: 1rem;
   }
 }
