@@ -1,3 +1,5 @@
+// frontend/src/AllRecipesPage.jsx
+
 import { useEffect, useState } from 'react';
 import { getAllRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
@@ -89,13 +91,15 @@ const AllRecipesPage = () => {
             ))}
           </div>
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={totalItems}
-            itemsPerPage={limit}
-            onPageChange={handlePageChange}
-          />
+          <div className="pagination-wrapper">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={limit}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </>
       )}
     </div>
