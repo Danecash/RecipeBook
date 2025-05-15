@@ -622,41 +622,33 @@ router.post("/recipes", upload.single('image'), validateRecipeData, async (req, 
 
     const { name, category } = req.body;
     const { ingredients, instructions } = req.parsedData;
-    const categoryDir = category.toLowerCase().replace(/\s+/g, '-');
     
-    let optimizedImage = req.file.path;
-    
-    try {
-      // Try to optimize if sharp is available
-      optimizedImage = await upload.optimize(req.file.path);
-      // Delete original if optimization succeeded
-      fs.unlink(req.file.path, (err) => {
-        if (err) console.error('Error deleting original image:', err);
-      });
-    } catch (optimizeError) {
-      console.error('Image optimization failed, using original:', optimizeError);
-    }
-    
-    const imagePath = `/backend/uploads/${categoryDir}/${path.basename(optimizedImage)}`;
+    // Optimize and store image
+    const { publicPath } = await upload.optimize(req.file.path, category);
     
     const newRecipe = new Recipe({
       name: name.trim(),
       category: category.trim(),
       ingredients,
       instructions,
-      image: imagePath,
-      imageOptimized: imagePath
+      image: publicPath,
+      imageOptimized: publicPath
     });
 
     const savedRecipe = await newRecipe.save();
+    
+    // Clean up original file
+    fs.unlink(req.file.path, () => {});
+
     res.status(201).json({
       success: true,
       recipe: formatRecipeImage(savedRecipe.toObject())
     });
 
   } catch (error) {
-    console.error("POST /recipes error:", error);
+    
     if (req.file?.path) fs.unlink(req.file.path, () => {});
+    console.error("POST /recipes error:", error);
     res.status(500).json(serverError(error));
   }
 });

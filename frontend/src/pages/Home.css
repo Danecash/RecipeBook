@@ -1,113 +1,132 @@
 /* frontend/src/pages/Home.css */
 .home-page {
-  padding-bottom: 4rem;
+  padding: var(--space-xl) var(--space-md);
+  padding-bottom: var(--space-2xl);
+  background-color: var(--light-cream);
 }
 
+/* Hero Section */
 .hero-section {
   background: linear-gradient(rgba(104, 96, 77, 0.7), rgba(104, 96, 77, 0.7)),
               url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');
   background-size: cover;
   background-position: center;
-  color: #fdfaf6;
-  padding: 4rem 0;
+  color: var(--light-cream);
+  padding: var(--space-3xl) 1rem;
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: var(--space-2xl);
 }
 
 .hero-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 var(--space-md);
 }
 
 .hero-content h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #fdfaf6;
+  font-size: 2.75rem;
+  margin-bottom: var(--space-sm);
+  color: var(--light-cream);
 }
 
 .hero-content p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  color: #fdfaf6;
+  font-size: 1.25rem;
+  margin-bottom: var(--space-md);
+  color: var(--light-cream);
 }
 
+/* Section Blocks */
 .section {
-  margin-bottom: 3rem;
-  padding: 0 1rem;
+  margin-bottom: var(--space-2xl);
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-lg);
+  padding: 0 var(--space-xs);
 }
 
 .section-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #5c4422;
-  margin: 0;
+  color: var(--dark-brown);
 }
 
-.section-icon {
-  color: #9cab7c;
+.section-header .section-icon {
+  color: var(--sage-green);
 }
 
-.view-all {
+.section-header .view-all {
+  color: var(--sage-green);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: #9cab7c;
-  font-weight: 500;
-  text-decoration: none;
+  transition: color var(--transition-fast);
 }
 
-.view-all:hover {
+.section-header .view-all:hover {
+  color: var(--dark-brown);
   text-decoration: underline;
 }
 
+/* Grid Layout for Recipes */
 .recipes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1.5rem;
+  gap: var(--space-lg);
+  padding: 0 var(--space-xs);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-/* Show 5 cards per row on large screens */
+/* Large Screens: 5 columns */
 @media (min-width: 1280px) {
   .recipes-grid {
     grid-template-columns: repeat(5, 1fr);
   }
 }
 
-/* Adjust grid for medium screens (4 per row) */
+/* Medium Screens: 4 columns */
 @media (min-width: 1024px) and (max-width: 1279px) {
   .recipes-grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
-/* Adjust grid for tablets (2–3 per row) */
-@media (max-width: 1023px) {
+/* Tablets: 2–3 columns */
+@media (min-width: 600px) and (max-width: 1023px) {
   .recipes-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Mobile single column layout */
-@media (max-width: 480px) {
+/* Mobile: 1 column */
+@media (max-width: 599px) {
   .recipes-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: var(--space-md);
   }
 
   .hero-content h1 {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 
   .hero-content p {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
 }
+
+/* Loading State */
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--dark-brown);
+  margin-top: var(--space-xl);
+}
+

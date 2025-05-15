@@ -1,23 +1,72 @@
-/* src/styles/SearchPage.css */
-
+/* Search Page Container */
 .search-page {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 2rem 1rem;
   text-align: center;
-  padding: 2rem;
+  background-color: var(--light-cream, #fdfaf6);
+  min-height: 100vh;
 }
 
+/* Search Heading */
+.search-page h2 {
+  font-size: 1.75rem;
+  color: var(--dark-brown, #5c4422);
+  margin-bottom: 1rem;
+  word-break: break-word;
+}
+
+/* Recipe Cards Grid */
 .recipes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
+  gap: 1.5rem;
   width: 100%;
   max-width: 1200px;
   margin-top: 2rem;
+  padding: 0 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
+/* Responsive Adjustments */
+@media (min-width: 1280px) {
+  .recipes-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .recipes-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  .recipes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 599px) {
+  .recipes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-page h2 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Loading State */
 .loading {
+  margin-top: 3rem;
+  font-size: 1.25rem;
+  color: var(--dark-brown, #5c4422);
+}
+
+/* Fallback Message */
+.search-page p {
+  font-size: 1rem;
+  color: #777;
   margin-top: 2rem;
-  font-size: 1.2rem;
 }

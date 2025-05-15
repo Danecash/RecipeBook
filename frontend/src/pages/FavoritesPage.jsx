@@ -1,3 +1,4 @@
+// frontend/src/pages/FavoritesPage.jsx
 import { useEffect, useState } from 'react';
 import { getFavorites, toggleFavorite } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
@@ -5,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import Pagination from '../components/Pagination';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../utils/imageUtils';
 import './FavoritesPage.css';
 
 const FavoritesPage = () => {
@@ -93,9 +95,13 @@ const FavoritesPage = () => {
               <div key={recipe._id} className="ranked-recipe">
                 <span className="recipe-rank">{(currentPage - 1) * limit + index + 1}</span>
                 <RecipeCard 
-                  recipe={recipe} 
-                  showRemoveButton={true} 
-                  onRemove={() => handleRemoveFavorite(recipe._id)} 
+                  recipe={{
+                    ...recipe,
+                    image: getImageUrl(recipe.image),
+                    imageOptimized: getImageUrl(recipe.imageOptimized),
+                  }}
+                  showRemoveButton={true}
+                  onRemove={() => handleRemoveFavorite(recipe._id)}
                 />
               </div>
             ))}
@@ -117,3 +123,4 @@ const FavoritesPage = () => {
 };
 
 export default FavoritesPage;
+

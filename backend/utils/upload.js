@@ -1,5 +1,4 @@
 // backend/utils/upload.js
-
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -26,36 +25,46 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 15 * 1024 * 1024 } // 15MB
+  limits: { fileSize: 15 * 1024 * 1024 }
 });
 
-// Check if sharp is available
+// Image optimization with Sharp
 let sharp;
 try {
   sharp = require('sharp');
   
-  // Image optimization function
-  upload.optimize = async (filePath) => {
+  upload.optimize = async (filePath, category) => {
     try {
-      const optimizedPath = filePath + '-optimized.jpg';
+      const categoryDir = category.toLowerCase().replace(/\s+/g, '-');
+      const optimizedDir = path.join(__dirname, '../uploads', categoryDir);
+      fs.mkdirSync(optimizedDir, { recursive: true });
+      
+      const optimizedFilename = `optimized-${path.basename(filePath)}.jpg`;
+      const optimizedPath = path.join(optimizedDir, optimizedFilename);
       
       await sharp(filePath)
-        .resize(800, 800, {
-          fit: 'cover',
-          position: 'center'
-        })
+        .resize(800, 800, { fit: 'cover' })
         .jpeg({ quality: 80 })
         .toFile(optimizedPath);
       
-      return optimizedPath;
+      return {
+        optimizedPath,
+        publicPath: `/uploads/${categoryDir}/${optimizedFilename}`
+      };
     } catch (error) {
-      console.error('Error optimizing image:', error);
-      return filePath; // Fallback to original
+      console.error('Optimization failed:', error);
+      return {
+        optimizedPath: filePath,
+        publicPath: filePath.replace(/^.*[\\\/]uploads[\\\/]/, '/uploads/')
+      };
     }
   };
-} catch (sharpError) {
-  console.warn('Sharp module not found, image optimization disabled');
-  upload.optimize = async (filePath) => filePath; // No optimization
+} catch (err) {
+  console.warn('Sharp not available - skipping optimization');
+  upload.optimize = async (filePath) => ({
+    optimizedPath: filePath,
+    publicPath: filePath.replace(/^.*[\\\/]uploads[\\\/]/, '/uploads/')
+  });
 }
 
 module.exports = upload;

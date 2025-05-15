@@ -1,5 +1,6 @@
 // backend/main.js
 
+require('dotenv').config();
 const express = require("express");
 const cors = require('cors');
 const path = require('path');
@@ -12,23 +13,24 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
 }));
-
 app.use(express.json());
 
-// Static files
+// Static files - Serve optimized images
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/backend/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use("/api", basicRoutes);
 app.use('/api/auth', authRoutes);
 
-// Load environment variables
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+// Error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
 
 // Start server
 const startServer = async () => {
@@ -36,6 +38,7 @@ const startServer = async () => {
     await connectDB();
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+      console.log(`Uploads directory: ${path.join(__dirname, 'uploads')}`);
     });
   } catch (error) {
     console.error('Server startup error:', error);

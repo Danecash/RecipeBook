@@ -4,6 +4,7 @@ import { getRecipes, getPopularRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import SectionHeader from '../components/SectionHeader';
 import { FaFire } from 'react-icons/fa';
+import { getImageUrl } from '../utils/imageUtils';
 import './Home.css';
 
 const Home = () => {
@@ -62,7 +63,14 @@ const Home = () => {
         <SectionHeader title="Featured Recipes" link="/all-recipes" />
         <div className="recipes-grid">
           {featuredRecipes.map(recipe => (
-            <RecipeCard key={recipe._id} recipe={recipe} />
+            <RecipeCard
+              key={recipe._id}
+              recipe={{
+                ...recipe,
+                image: getImageUrl(recipe.image),
+                imageOptimized: getImageUrl(recipe.imageOptimized),
+              }}
+            />
           ))}
         </div>
       </section>
@@ -72,18 +80,33 @@ const Home = () => {
         <SectionHeader title="Popular Recipes" icon={<FaFire />} link="/popular" />
         <div className="recipes-grid">
           {popularRecipes.map(recipe => (
-            <RecipeCard key={recipe._id} recipe={recipe} showStats={true} />
+            <RecipeCard
+              key={recipe._id}
+              showStats={true}
+              recipe={{
+                ...recipe,
+                image: getImageUrl(recipe.image),
+                imageOptimized: getImageUrl(recipe.imageOptimized),
+              }}
+            />
           ))}
         </div>
       </section>
 
-      {/* Category Sections (no numbers, clean grid layout) */}
+      {/* Category Sections */}
       {['Appetizer', 'Meal', 'Beverages', 'Desserts'].map(category => (
         <section key={category} className="section">
           <SectionHeader title={`${category} Recipes`} link={`/category/${category.toLowerCase()}`} />
           <div className="recipes-grid">
             {categoryRecipes[category]?.map(recipe => (
-              <RecipeCard key={recipe._id} recipe={recipe} />
+              <RecipeCard
+                key={recipe._id}
+                recipe={{
+                  ...recipe,
+                  image: getImageUrl(recipe.image),
+                  imageOptimized: getImageUrl(recipe.imageOptimized),
+                }}
+              />
             ))}
           </div>
         </section>
@@ -93,4 +116,3 @@ const Home = () => {
 };
 
 export default Home;
-

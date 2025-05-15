@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { searchRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
+import { getImageUrl } from '../utils/imageUtils';
 import '../pages/SearchPage.css';
 
 const SearchPage = () => {
@@ -47,7 +48,14 @@ const SearchPage = () => {
         <>
           <div className="recipes-grid">
             {results.map(recipe => (
-              <RecipeCard key={recipe._id} recipe={recipe} />
+              <RecipeCard 
+                key={recipe._id} 
+                recipe={{
+                  ...recipe,
+                  image: getImageUrl(recipe.image),
+                  imageOptimized: getImageUrl(recipe.imageOptimized),
+                }}
+              />
             ))}
           </div>
           <Pagination

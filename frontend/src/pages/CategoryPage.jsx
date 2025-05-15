@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getRecipesByCategory } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
+import { getImageUrl } from '../utils/imageUtils';
 import './CategoryPage.css';
 
 const CategoryPage = () => {
@@ -52,8 +53,16 @@ const CategoryPage = () => {
           <div className="ranked-recipes">
             {recipes.map((recipe, index) => (
               <div key={recipe._id} className="ranked-recipe">
-                <span className="recipe-rank">{(currentPage - 1) * limit + index + 1}</span>
-                <RecipeCard recipe={recipe} />
+                <span className="recipe-rank">
+                  {(currentPage - 1) * limit + index + 1}
+                </span>
+                <RecipeCard
+                  recipe={{
+                    ...recipe,
+                    image: getImageUrl(recipe.image),
+                    imageOptimized: getImageUrl(recipe.imageOptimized),
+                  }}
+                />
               </div>
             ))}
           </div>

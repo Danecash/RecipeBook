@@ -1,11 +1,11 @@
 // frontend/src/AllRecipesPage.jsx
-
 import { useEffect, useState } from 'react';
 import { getAllRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
 import { useNavigate } from 'react-router-dom';
 import { FaCalendarAlt, FaClock } from 'react-icons/fa';
+import { getImageUrl } from '../utils/imageUtils';
 
 const AllRecipesPage = () => {
   const [recipes, setRecipes] = useState([]);
@@ -77,7 +77,13 @@ const AllRecipesPage = () => {
           <div className="recipes-grid">
             {recipes.map((recipe) => (
               <div key={recipe._id} className="recipe-card-wrapper">
-                <RecipeCard recipe={recipe} />
+                <RecipeCard
+                  recipe={{
+                    ...recipe,
+                    image: getImageUrl(recipe.image),
+                    imageOptimized: getImageUrl(recipe.imageOptimized),
+                  }}
+                />
                 <div className="recipe-meta">
                   <span className="meta-item">
                     <FaCalendarAlt />{' '}

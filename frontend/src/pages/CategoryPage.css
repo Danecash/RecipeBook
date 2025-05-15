@@ -1,44 +1,54 @@
 /* frontend/src/pages/CategoryPage.css */
+
 .category-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-xl) var(--space-md);
+  padding: 6rem 1.5rem 8rem;
+  text-align: center;
+  background-color: #fdfaf6;
+  min-height: 100vh;
 }
 
 .category-title {
-  color: var(--dark-brown);
-  margin-bottom: var(--space-sm);
+  font-size: 2.5rem;
+  color: #3e3e3e;
+  margin-bottom: 1rem;
 }
 
 .back-link {
   display: inline-block;
-  margin-bottom: var(--space-xl);
-  color: var(--sage-green);
+  margin-bottom: 3rem;
+  font-size: 1.1rem;
+  color: #7a6d51;
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: color 0.2s ease;
 }
 
 .back-link:hover {
-  color: var(--dark-brown);
+  color: #5f543f;
 }
 
 .ranked-recipes {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--space-xl);
-  margin-bottom: var(--space-xl);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 4rem;
+  margin-bottom: 5rem;
+  padding: 1rem;
 }
 
 .ranked-recipe {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .recipe-rank {
   position: absolute;
-  top: -15px;
-  left: -15px;
-  background-color: var(--sage-green);
-  color: var(--light-cream);
+  top: -12px;
+  left: -12px;
+  background-color: #7a6d51;
+  color: #fefdfc;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -47,25 +57,60 @@
   justify-content: center;
   font-weight: bold;
   font-size: 1.2rem;
-  z-index: 1;
-  box-shadow: var(--shadow-md);
+  z-index: 2;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* Loading and no-recipes message */
+.loading {
+  font-size: 1.3rem;
+  color: #555;
+  margin-top: 5rem;
+}
+
+.category-page p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-top: 2rem;
+}
+
+/* Responsive Tweaks */
 @media (max-width: 768px) {
+  .category-title {
+    font-size: 2.2rem;
+  }
+
   .ranked-recipes {
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
+    gap: 3rem;
+  }
+
+  .recipe-rank {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
   .ranked-recipes {
     grid-template-columns: 1fr;
+    gap: 3rem;
   }
-  
-  .recipe-rank {
-    width: 35px;
-    height: 35px;
+
+  .category-title {
+    font-size: 2rem;
+  }
+
+  .back-link {
     font-size: 1rem;
+  }
+
+  .recipe-rank {
+    top: -10px;
+    left: -10px;
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
   }
 }
