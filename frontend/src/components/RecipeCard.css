@@ -32,15 +32,18 @@
   height: 100%;
 }
 
-.card-image img {
+.card-image img,
+.card-image-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform var(--transition-slow);
   display: block;
+  border-radius: 0; /* reset any style from fallback */
 }
 
-.recipe-card:hover .card-image img {
+.recipe-card:hover .card-image img,
+.recipe-card:hover .card-image-container img {
   transform: scale(1.05);
 }
 

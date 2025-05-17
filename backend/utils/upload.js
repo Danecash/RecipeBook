@@ -43,7 +43,7 @@ try {
       const optimizedPath = path.join(optimizedDir, optimizedFilename);
       
       await sharp(filePath)
-        .resize(800, 800, { fit: 'cover' })
+        .resize(800, 600) // Consistent 4:3 ratio
         .jpeg({ quality: 80 })
         .toFile(optimizedPath);
       

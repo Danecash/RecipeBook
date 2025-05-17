@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import FavoriteButton from './FavoriteButton';
 import { FaHeart, FaStar, FaComment } from 'react-icons/fa';
-import { getImageUrl } from '../utils/imageUtils';
+import ImageWithFallback from './ImageWithFallback';
+import { getImageUrl, imageStyle } from '../utils/imageUtils';
 import './RecipeCard.css';
 
 const RecipeCard = ({
@@ -20,16 +21,15 @@ const RecipeCard = ({
       <Link to={`/recipe/${recipe._id}`} state={{ recipe }}>
         <div className="card-image-container">
           <div className="card-image">
-            <img
+            <ImageWithFallback
               src={getImageUrl(recipe.imageOptimized || recipe.image)}
               alt={recipe.name}
-              onError={(e) => {
-                e.target.src = '/placeholder-recipe.jpg';
-              }}
+              style={imageStyle}
+              fallbackSrc="/placeholder-recipe.jpg"
             />
           </div>
           <div className="card-overlay">
-            <span className={`category-tag ${recipe.category.toLowerCase()}`}>
+            <span className={`category-tag ${recipe.category?.toLowerCase()}`}>
               {recipe.category}
             </span>
           </div>

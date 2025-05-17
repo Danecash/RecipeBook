@@ -8,10 +8,12 @@ export const getImageUrl = (imagePath) => {
   }
   
   // Handle optimized images
-  if (imagePath.includes('optimized') || imagePath.includes('?')) {
-    return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${imagePath}`;
-  }
-  
-  // Default case for backend uploads
   return `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${imagePath}`;
+};
+
+export const imageStyle = {
+  width: '100%',
+  height: '200px', // Fixed height for consistency
+  objectFit: 'cover', // Ensures images fill the space without distortion
+  borderRadius: '8px' // Optional: for rounded corners
 };

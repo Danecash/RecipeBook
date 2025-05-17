@@ -251,3 +251,22 @@ textarea {
     padding: var(--space-lg) 0;
   }
 }
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  :root {
+    --recipe-card-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --recipe-card-width: 100%;
+  }
+}
