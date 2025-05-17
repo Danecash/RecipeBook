@@ -1,27 +1,31 @@
 /* frontend/src/components/RecipeCard.css */
 .recipe-card {
-  background-color: var(--white);
+  background-color: #fff;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-normal);
+  /* Use custom property if available, fallback to static value */
+  box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: all var(--transition-normal, 0.3s ease);
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
   position: relative;
 }
 
 .recipe-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-5px);
+  /* Use custom property if available, fallback to static value */
+  box-shadow: var(--shadow-md, 0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
 /* Image Container */
 .card-image-container {
   position: relative;
   width: 100%;
-  padding-top: 100%; /* Maintains 1:1 aspect ratio */
+  /* Prefer 4:3 aspect ratio for more modern look */
+  padding-top: 75%;
   overflow: hidden;
+  background-color: #f5f5f5;
 }
 
 .card-image {
@@ -30,6 +34,8 @@
   left: 0;
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
 .card-image img,
@@ -37,7 +43,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--transition-slow);
+  transition: transform var(--transition-slow, 0.3s);
   display: block;
   border-radius: 0; /* reset any style from fallback */
 }
@@ -56,104 +62,102 @@
   height: 100%;
   display: flex;
   align-items: flex-end;
-  padding: var(--space-md);
-  background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.5));
+  padding: 1rem;
+  background: linear-gradient(transparent 60%, rgba(0, 0, 0, 0.6));
 }
 
 .category-tag {
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: 999px;
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
   font-size: 0.75rem;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  backdrop-filter: blur(2px);
+  color: white;
 }
 
 .category-tag.appetizer {
-  background-color: var(--sage-green);
-  color: var(--light-cream);
+  background-color: #4CAF50;
 }
 
 .category-tag.beverages {
-  background-color: var(--soft-green);
-  color: var(--dark-brown);
+  background-color: #2196F3;
 }
 
 .category-tag.desserts {
-  background-color: var(--warm-beige);
-  color: var(--dark-brown);
+  background-color: #9C27B0;
 }
 
 .category-tag.meal {
-  background-color: var(--dark-brown);
-  color: var(--light-cream);
+  background-color: #FF5722;
 }
 
 /* Content Section */
 .card-content {
-  padding: var(--space-md);
+  padding: 1rem;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .card-content h3 {
+  margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--dark-brown);
-  margin-bottom: var(--space-sm);
+  color: var(--dark-brown, #333);
+  margin-bottom: var(--space-sm, 0.5rem);
   line-height: 1.3;
 }
 
 /* Stats Row */
 .recipe-stats {
   display: flex;
-  gap: var(--space-md);
+  gap: 1rem;
   margin-top: auto;
-  padding-top: var(--space-sm);
+  padding-top: 0.5rem;
   font-size: 0.875rem;
-  color: var(--sage-green);
+  color: #666;
 }
 
 .recipe-stats .stat {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: 0.25rem;
 }
 
 /* Extra Info */
 .recipe-extra-info {
-  margin-top: var(--space-sm);
-  font-size: 0.85rem;
-  color: var(--sage-green);
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--sage-green, #666);
   line-height: 1.4;
 }
 
 /* Action Buttons */
 .card-actions {
+  padding: 0 1rem 1rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 var(--space-md) var(--space-md);
 }
 
 .remove-btn {
-  background-color: transparent;
-  color: var(--error-color, #d9534f);
+  padding: 0.5rem 1rem;
+  background-color: #dc3545;
+  color: white;
   border: none;
-  font-size: 0.85rem;
+  border-radius: 4px;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
 }
 
 .remove-btn:hover {
-  background-color: rgba(217, 83, 79, 0.1);
+  background-color: #c82333;
 }
 
-/* Responsive */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .recipe-card {
     border-radius: 8px;

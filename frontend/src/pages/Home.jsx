@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getRecipes, getPopularRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import SectionHeader from '../components/SectionHeader';
+import SearchBar from '../components/SearchBar';
 import { FaFire } from 'react-icons/fa';
 import { getImageUrl } from '../utils/imageUtils';
 import './Home.css';
@@ -55,6 +56,9 @@ const Home = () => {
         <div className="hero-content">
           <h1>Discover Delicious Recipes</h1>
           <p>Find your next favorite meal from our curated collection</p>
+          <div className="hero-search">
+            <SearchBar />
+          </div>
         </div>
       </section>
 
