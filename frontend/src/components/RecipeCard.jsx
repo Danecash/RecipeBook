@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import FavoriteButton from './FavoriteButton';
 import { FaHeart, FaStar, FaComment } from 'react-icons/fa';
 import ImageWithFallback from './ImageWithFallback';
-import { getImageUrl, imageStyle } from '../utils/imageUtils';
+import { getImageUrl } from '../utils/imageUtils';
 import './RecipeCard.css';
 
 const RecipeCard = ({
@@ -16,6 +16,16 @@ const RecipeCard = ({
 }) => {
   const { user } = useAuth();
 
+  // Define a consistent image style to ensure proper rendering
+  const consistentImageStyle = {
+    objectFit: 'cover',
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0
+  };
+
   return (
     <div className="recipe-card">
       <Link to={`/recipe/${recipe._id}`} state={{ recipe }}>
@@ -24,7 +34,7 @@ const RecipeCard = ({
             <ImageWithFallback
               src={getImageUrl(recipe.imageOptimized || recipe.image)}
               alt={recipe.name}
-              style={imageStyle}
+              style={consistentImageStyle}
               fallbackSrc="/placeholder-recipe.jpg"
             />
           </div>

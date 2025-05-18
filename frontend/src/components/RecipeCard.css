@@ -40,12 +40,33 @@
 
 .card-image img,
 .card-image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform var(--transition-slow, 0.3s);
   display: block;
   border-radius: 0; /* reset any style from fallback */
+}
+
+/* Override any inline styles that might be causing issues */
+.card-image img[style],
+.card-image-container img[style] {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Ensure the ImageWithFallback component renders correctly */
+.card-image-container .fallback-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .recipe-card:hover .card-image img,
