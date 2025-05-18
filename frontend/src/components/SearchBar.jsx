@@ -1,7 +1,9 @@
 // frontend/src/components/SearchBar.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaSearch } from 'react-icons/fa';
 import './SearchBar.css';
+
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');
@@ -17,17 +19,19 @@ const SearchBar = () => {
   };
 
   return (
-    <form onSubmit={handleSearch} className="search-bar">
+    <form onSubmit={handleSearch} className="search-form">
       <input
         type="text"
-        placeholder="Search recipes..."
-        className="search-bar"
+        placeholder="Search..."
+        className="search-input"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         required
         minLength={2}
       />
-      <button type="submit">Search</button>
+      <button type="submit" className="search-button">
+        <FaSearch />
+      </button>
     </form>
   );
 };

@@ -199,4 +199,28 @@
   .user-dropdown:hover .dropdown-content {
     display: block;
   }
+  
+  .nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  gap: var(--space-lg); /* Add this if spacing is too tight */
+}
+
+.main-links, .user-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* Optional: Center search bar only on wide screens */
+@media (min-width: 768px) {
+  .search-bar {
+    margin: 0 24px;
+  }
+}
+
 }
