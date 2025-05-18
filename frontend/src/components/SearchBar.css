@@ -1,0 +1,22 @@
+.search-bar input {
+  width: 200px;         /* Smaller width */
+  padding: 6px 10px;     /* Comfortable padding */
+  font-size: 14px;       /* Readable size */
+  border-radius: 6px;    /* Rounded corners */
+  border: 1px solid #ccc;
+}
+
+/* Optional: style the button to match your theme */
+.search-bar button {
+  padding: 6px 12px;
+  margin-left: 8px;
+  background-color: #948979;  /* DARKBEIGE */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background-color: #393E46;  /* GREY */
+}

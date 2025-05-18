@@ -1,6 +1,7 @@
 // frontend/src/components/SearchBar.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './SearchBar.css';
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');
@@ -20,6 +21,7 @@ const SearchBar = () => {
       <input
         type="text"
         placeholder="Search recipes..."
+        className="search-bar"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         required
