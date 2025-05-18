@@ -41,10 +41,14 @@ const RegisterPage = () => {
   return (
     <div className="auth-page">
       <div className="auth-container">
+      <div className="auth-logo">
+        <span className="auth-logo-emoji">🍳</span>
+        <span className="auth-logo-text">RecipeBook</span>
+      </div>
         <h2>Register</h2>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="register-group">
             <label>Name</label>
             <input
               type="text"
@@ -53,7 +57,7 @@ const RegisterPage = () => {
               required
             />
           </div>
-          <div className="form-group">
+          <div className="register-group">
             <label>Email</label>
             <input
               type="email"
@@ -62,7 +66,7 @@ const RegisterPage = () => {
               required
             />
           </div>
-          <div className="form-group">
+          <div className="register-group">
             <label>Password</label>
             <input
               type="password"
@@ -72,7 +76,7 @@ const RegisterPage = () => {
               minLength="6"
             />
           </div>
-          <div className="form-group">
+          <div className="register-group">
             <label>Confirm Password</label>
             <input
               type="password"

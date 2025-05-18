@@ -1,98 +1,131 @@
 /* RegisterPage.css */
 
 .auth-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, var(--sage-green), var(--dark-brown));
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  .auth-container {
-    background-color: white;
-    padding: 2rem 2.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-  }
-  
-  .auth-container h2 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    color: #333;
-  }
-  
-  .form-group {
-    margin-bottom: 1.2rem;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #555;
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.2s;
-  }
-  
-  .form-group input:focus {
-    outline: none;
-    border-color: #1976d2;
-  }
-  
-  button[type="submit"] {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: #8F9779;
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  button[type="submit"]:hover {
-    background-color: #1565c0;
-  }
-  
-  button[disabled] {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
-  .error-message {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 0.75rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .auth-link {
-    margin-top: 1rem;
-    text-align: center;
-    font-size: 0.95rem;
-  }
-  
-  .auth-link a {
-    color: #1976d2;
-    text-decoration: none;
-    font-weight: 600;
-  }
-  
-  .auth-link a:hover {
-    text-decoration: underline;
-  }
-  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--sage-green), var(--dark-brown));
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 450px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  text-align: center;
+}
+
+.auth-logo {
+  margin-bottom: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.auth-logo-emoji {
+  font-size: 3rem;
+  color: var(--sage-green);
+}
+
+.auth-logo-text {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--dark-brown);
+}
+
+h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.auth-form {
+  margin-top: 2rem;
+}
+
+.register-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.register-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #5c4033;
+  font-size: 0.95rem;
+}
+
+.register-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #598556; 
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #fff;
+  color: #333;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box; 
+}
+
+.register-group input:focus {
+  outline: none;
+  border-color: #8F9779; 
+  box-shadow: 0 0 0 2px rgba(143, 151, 121, 0.2);
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  background-color: #8F9779;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #6d775c;
+}
+
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.auth-link {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #4E342E;
+}
+
+.auth-link a {
+  color: #8F9779;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
