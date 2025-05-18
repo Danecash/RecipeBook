@@ -43,31 +43,39 @@
 }
 
 .form-group.with-icon {
-  position: relative;
-  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding: 0 var(--space-md);
+  border: 1px solid var(--warm-beige);
+  border-radius: 8px;
+  background: white;
+  transform: translateZ(0);
+}
+
+.form-group.with-icon:focus-within {
+  border-color: var(--sage-green);
+  box-shadow: 0 0 0 2px rgba(138, 142, 117, 0.2);
 }
 
 .input-icon {
-  position: absolute;
-  left: var(--space-md);
-  top: 50%;
-  transform: translateY(-50%);
   color: var(--warm-beige);
+  margin-right: var(--space-sm);
+  flex-shrink: 0;
 }
 
 .form-group input {
-  width: 100%;
-  padding: var(--space-md) var(--space-md) var(--space-md) calc(var(--space-md) * 2 + 1rem);
-  border: 1px solid var(--warm-beige);
-  border-radius: 8px;
+  width: calc(100% - 2rem);
+  padding: var(--space-md) 0;
+  border: none !important;
   font-size: 1rem;
-  transition: all var(--transition-fast);
+  background: transparent;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: var(--sage-green);
-  box-shadow: 0 0 0 2px rgba(138, 142, 117, 0.2);
+  box shadow: none !important;
 }
 
 .form-options {
