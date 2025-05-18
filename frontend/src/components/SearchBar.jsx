@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { FaSearch } from 'react-icons/fa';
 import './SearchBar.css';
 
-
 const SearchBar = () => {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
@@ -19,20 +18,21 @@ const SearchBar = () => {
   };
 
   return (
-    <form onSubmit={handleSearch} className="search-form">
+    <form onSubmit={handleSearch} className="search-form-enhanced">
       <input
         type="text"
         placeholder="Search..."
-        className="search-input"
+        className="search-input-enhanced"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         required
         minLength={2}
       />
-      <button type="submit" className="search-button">
-        <FaSearch />
-      </button>
-    </form>
+        <button type="submit" className="search-button-enhanced">
+    <FaSearch />
+  </button>
+</form>
+
   );
 };
 

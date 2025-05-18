@@ -96,25 +96,6 @@ const Home = () => {
           ))}
         </div>
       </section>
-
-      {/* Category Sections */}
-      {['Appetizer', 'Meal', 'Beverages', 'Desserts'].map(category => (
-        <section key={category} className="section">
-          <SectionHeader title={`${category} Recipes`} link={`/category/${category.toLowerCase()}`} />
-          <div className="recipes-grid">
-            {categoryRecipes[category]?.map(recipe => (
-              <RecipeCard
-                key={recipe._id}
-                recipe={{
-                  ...recipe,
-                  image: getImageUrl(recipe.image),
-                  imageOptimized: getImageUrl(recipe.imageOptimized),
-                }}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
     </div>
   );
 };

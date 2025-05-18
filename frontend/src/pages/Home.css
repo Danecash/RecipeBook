@@ -8,7 +8,7 @@
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(rgba(104, 96, 77, 0.7), rgba(104, 96, 77, 0.7)),
+  background: linear-gradient(rgba(145, 135, 111, 0.7), rgba(136, 128, 110, 0.7)),
               url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');
   background-size: cover;
   background-position: center;
@@ -21,60 +21,85 @@
 .hero-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0 var(--space-md, 2rem);
+  padding: 0 clamp(1rem, 5vw, 2rem);
 }
 
 .hero-content h1 {
   font-size: 2.75rem;
   margin-bottom: var(--space-sm, 1rem);
   color: var(--light-cream, #fdfaf6);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .hero-content p {
   font-size: 1.25rem;
   margin-bottom: var(--space-md, 2rem);
   color: var(--light-cream, #fdfaf6);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .hero-search {
-  max-width: 600px;
-  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background-color: transparent;
 }
 
 .hero-search .search-bar {
   display: flex;
-  gap: 1rem;
-  background: white;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 999px;
   padding: 0.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .hero-search .search-bar input {
   flex: 1;
-  padding: 0.75rem 1rem;
   border: none;
-  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
   font-size: 1rem;
+  background-color: transparent;
+  color: #333;
+}
+
+.hero-search .search-bar input::placeholder {
+  color: #bbb;
+}
+
+.hero-search .search-bar input:focus {
+  outline: none;
 }
 
 .hero-search .search-bar button {
-  padding: 0.75rem 1.5rem;
-  background: #4CAF50;
-  color: white;
+  background-color: #38a538;
   border: none;
-  border-radius: 4px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
+  transition: background-color 0.3s ease;
 }
 
 .hero-search .search-bar button:hover {
-  background: #45a049;
+  background-color: #2f8e2f;
 }
 
+.hero-search .search-bar button svg {
+  color: white;
+  font-size: 1rem;
+}
+
+/* Sections */
 .section {
-  padding: 3rem 2rem;
+  padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem);
   margin-bottom: var(--space-2xl, 3rem);
 }
 
@@ -123,6 +148,7 @@
 .recipes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-rows: 1fr;
   gap: 2rem;
   margin-top: 2rem;
   padding: 0 var(--space-xs, 0.5rem);
@@ -142,7 +168,7 @@
   }
 }
 
-/* Tablets: 2–3 columns */
+/* Tablets: 2 columns */
 @media (min-width: 600px) and (max-width: 1023px) {
   .recipes-grid {
     grid-template-columns: repeat(2, 1fr);

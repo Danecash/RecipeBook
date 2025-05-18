@@ -43,18 +43,18 @@
 }
 
 .category-button.meal {
-  background-color: var(--dark-brown);
+  background-color: var(--sage-green);
   color: var(--light-cream);
 }
 
 .category-button.beverages {
-  background-color: var(--soft-green);
-  color: var(--dark-brown);
+  background-color: var(--sage-green);
+  color: var(--light-cream);
 }
 
 .category-button.desserts {
-  background-color: var(--warm-beige);
-  color: var(--dark-brown);
+  background-color: var(--sage-green);
+  color: var(--light-cream);
 }
 
 @media (max-width: 768px) {
@@ -66,4 +66,14 @@
     padding: var(--space-xs) var(--space-md);
     font-size: 0.9rem;
   }
+}
+
+.category-button.active {
+  background-color: var(--dark-brown);
+  color: var(--light-cream);
+}
+
+.category-button.active:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
 }

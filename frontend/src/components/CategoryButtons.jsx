@@ -1,5 +1,5 @@
 // frontend/src/components/CategoryButtons.jsx
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './CategoryButtons.css';
 
 const categories = [
@@ -10,19 +10,26 @@ const categories = [
 ];
 
 const CategoryButtons = () => {
+  const location = useLocation();
+  
   return (
     <div className="category-buttons-container">
       <div className="category-buttons">
-        {categories.map((category) => (
-          <Link 
-            key={category.name} 
-            to={`/category/${category.name.toLowerCase()}`}
-            className={`category-button ${category.name.toLowerCase()}`}
-          >
-            <span className="category-icon">{category.icon}</span>
-            {category.name}
-          </Link>
-        ))}
+        {categories.map((category) => {
+          const path = `/category/${category.name.toLowerCase()}`;
+          const isActive = location.pathname === path;
+
+          return (
+            <Link 
+              key={category.name} 
+              to={path}
+              className={`category-button ${category.name.toLowerCase()} ${isActive ? 'active' : ''}`}
+            >
+              <span className="category-icon">{category.icon}</span>
+              {category.name}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
