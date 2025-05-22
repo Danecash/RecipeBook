@@ -3,6 +3,8 @@
   background-color: var(--dark-brown);
   color: var(--light-cream);
   padding: var(--space-xl) 0;
+  position: relative;
+  z-index: 1;
 }
 
 .footer-container {
@@ -11,7 +13,7 @@
   gap: var(--space-xl);
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--space-md);
+  padding: 0 var(--space-md,5px);
 }
 
 .footer-logo {
@@ -64,7 +66,7 @@
 
 .footer-contact p {
   display: flex;
-  align-items: center;
+  align-items: 100%;
   gap: var(--space-sm);
   margin-bottom: var(--space-sm);
 }
@@ -88,7 +90,7 @@
 .footer-bottom {
   text-align: center;
   padding-top: var(--space-xl);
-  margin-top: var(--space-xl);
+  margin-top: var(--space-xl, 50px);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
