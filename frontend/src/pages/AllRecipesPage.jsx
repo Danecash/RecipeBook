@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { getAllRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import { FaUtensils, FaGlassMartiniAlt, FaIceCream, FaDrumstickBite } from 'react-icons/fa';
-import './AllRecipesPage.css';
+import '../styles/AllRecipesPage.css';
 
 const AllRecipesPage = () => {
   const [recipes, setRecipes] = useState([]);

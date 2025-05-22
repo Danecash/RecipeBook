@@ -6,7 +6,7 @@ import { searchRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
 import { getImageUrl } from '../utils/imageUtils';
-import '../pages/SearchPage.css';
+import '../styles/SearchPage.css';
 
 const SearchPage = () => {
   const { query } = useParams();

@@ -5,7 +5,7 @@ import { getRecipesByCategory } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
 import { getImageUrl } from '../utils/imageUtils';
-import './CategoryPage.css';
+import '../styles/CategoryPage.css';
 
 const CategoryPage = () => {
   const { category } = useParams();

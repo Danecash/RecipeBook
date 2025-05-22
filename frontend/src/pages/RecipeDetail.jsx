@@ -30,7 +30,7 @@ import {
   FaClipboardList,
   FaImage
 } from 'react-icons/fa';
-import './RecipeDetail.css';
+import '../styles/RecipeDetail.css';
 
 const RecipeDetail = () => {
   const { id } = useParams();

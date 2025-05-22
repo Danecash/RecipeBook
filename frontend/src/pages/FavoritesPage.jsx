@@ -7,7 +7,7 @@ import Pagination from '../components/Pagination';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUtils';
-import './FavoritesPage.css';
+import '../styles/FavoritesPage.css';
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState([]);

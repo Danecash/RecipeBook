@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { addRecipe } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import './AddRecipe.css';
+import '../styles/AddRecipe.css';
 
 const AddRecipe = () => {
   const navigate = useNavigate();

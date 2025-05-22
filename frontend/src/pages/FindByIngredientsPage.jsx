@@ -5,7 +5,7 @@ import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaUtensils, FaExclamationTriangle, FaPlus, FaTimes } from 'react-icons/fa';
-import '../pages/FindByIngredientsPage.css';
+import '../styles/FindByIngredientsPage.css';
 
 
 const FindByIngredientsPage = () => {

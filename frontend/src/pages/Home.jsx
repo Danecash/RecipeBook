@@ -6,7 +6,7 @@ import SectionHeader from '../components/SectionHeader';
 import SearchBar from '../components/SearchBar';
 import { FaFire } from 'react-icons/fa';
 import { getImageUrl } from '../utils/imageUtils';
-import './Home.css';
+import '../styles/Home.css';
 
 const Home = () => {
   const [featuredRecipes, setFeaturedRecipes] = useState([]);
