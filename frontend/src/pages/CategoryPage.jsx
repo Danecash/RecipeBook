@@ -43,7 +43,7 @@ const CategoryPage = () => {
 
   return (
     <div className="category-page">
-      <h1 className="category-title">Top {category} Recipes</h1>
+      <h1 className="category-title">{category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()} Recipes</h1>
       <Link to="/" className="back-link">← Back to Home</Link>
 
       {recipes.length === 0 ? (

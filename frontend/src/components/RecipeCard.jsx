@@ -26,6 +26,11 @@ const RecipeCard = ({
     });
   };
 
+  const handleFavoriteClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
     <div className="recipe-card">
       <Link to={`/recipe/${recipe._id}`} state={{ recipe }}>
@@ -54,7 +59,7 @@ const RecipeCard = ({
           </div>
 
           {showStats && (
-            <div className="recipe-stats">
+            <div className="recipe-stats" onClick={handleFavoriteClick}>
               <FavoriteButton
                 recipeId={recipe._id}
                 initialCount={recipe.favoriteCount || 0}
