@@ -630,37 +630,47 @@ router.get("/optimize-images", async (req, res) => {
 // CREATE recipe
 router.post("/recipes", upload.single('image'), validateRecipeData, async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "Recipe image is required" });
+    if (!req.file) {
+      return res.status(400).json({ error: "Recipe image is required" });
+    }
 
     const { name, category } = req.body;
     const { ingredients, instructions } = req.parsedData;
     
-    // Optimize and store image
-    const { publicPath } = await upload.optimize(req.file.path, category);
+    // Create directory path based on category
+    const categoryDir = category.toLowerCase().replace(/\s+/g, '-');
+    const uploadPath = path.join(__dirname, '../uploads', categoryDir);
     
+    // Ensure directory exists
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
+    // Create the new recipe
     const newRecipe = new Recipe({
       name: name.trim(),
       category: category.trim(),
       ingredients,
       instructions,
-      image: publicPath,
-      imageOptimized: publicPath
+      image: `/backend/uploads/${categoryDir}/${req.file.filename}`,
+      imageOptimized: `/backend/uploads/${categoryDir}/${req.file.filename}`
     });
 
     const savedRecipe = await newRecipe.save();
     
-    // Clean up original file
-    fs.unlink(req.file.path, () => {});
-
     res.status(201).json({
       success: true,
       recipe: formatRecipeImage(savedRecipe.toObject())
     });
 
   } catch (error) {
-    
-    if (req.file?.path) fs.unlink(req.file.path, () => {});
     console.error("POST /recipes error:", error);
+    
+    // Clean up uploaded file if error occurred
+    if (req.file?.path) {
+      fs.unlink(req.file.path, () => {});
+    }
+    
     res.status(500).json(serverError(error));
   }
 });

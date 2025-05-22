@@ -49,24 +49,17 @@ export const searchRecipes = (query, page = 1, limit = 12) => {
   });
 };
 
-export const addRecipe = (recipeData) => {
-  const formData = new FormData();
+export const addRecipe = async (recipeData) => {
   try {
-    Object.keys(recipeData).forEach(key => {
-      if (key === 'ingredients' || key === 'instructions') {
-        formData.append(key, JSON.stringify(recipeData[key]));
-      } else if (key === 'image') {
-        formData.append('image', recipeData[key]);
-      } else {
-        formData.append(key, recipeData[key]);
+    const response = await api.post('/recipes', recipeData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
     });
-    return api.post('/recipes', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 15000
-    });
+    return response.data;
   } catch (error) {
-    return Promise.reject(error);
+    console.error('Error adding recipe:', error);
+    throw error;
   }
 };
 

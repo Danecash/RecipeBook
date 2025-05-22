@@ -1,4 +1,23 @@
-/* frontend/src/pages/LoginPage.css */
+:root {
+  --sage-green: #8a8e75;
+  --dark-brown: #5c3b2e;
+  --warm-beige: #d8c3a5;
+  --light-cream: #f5f0e1;
+  --white: #ffffff;
+
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  --font-heading: 'Poppins', sans-serif;
+
+  --shadow-xl: 0 10px 20px rgba(0, 0, 0, 0.15);
+
+  --transition-fast: 0.2s ease-in-out;
+}
+
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -46,12 +65,11 @@
   display: flex;
   align-items: center;
   width: 100%;
-  min-width: 0;
   padding: 0 var(--space-md);
   border: 1px solid var(--warm-beige);
   border-radius: 8px;
   background: white;
-  transform: translateZ(0);
+  margin-bottom: var(--space-md);
 }
 
 .form-group.with-icon:focus-within {
@@ -66,16 +84,16 @@
 }
 
 .form-group input {
-  width: calc(100% - 2rem);
+  width: 100%;
   padding: var(--space-md) 0;
-  border: none !important;
+  border: none;
   font-size: 1rem;
   background: transparent;
 }
 
 .form-group input:focus {
   outline: none;
-  box shadow: none !important;
+  box-shadow: none;
 }
 
 .form-options {
@@ -108,7 +126,15 @@
   font-size: 1rem;
   font-weight: 600;
   border-radius: 8px;
-  margin-top: var(--space-md);
+  background-color: var(--sage-green);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.login-submit:hover {
+  background-color: #7a7d65;
 }
 
 .login-divider {
@@ -116,6 +142,7 @@
   align-items: center;
   margin: var(--space-xl) 0;
   color: var(--warm-beige);
+  font-size: 0.9rem;
 }
 
 .login-divider::before,
@@ -150,7 +177,7 @@
   justify-content: center;
   gap: var(--space-sm);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast);
 }
 
 .social-btn:hover {
@@ -167,6 +194,7 @@
 
 .login-link {
   color: var(--dark-brown);
+  font-size: 0.95rem;
 }
 
 .login-link a {
@@ -177,4 +205,13 @@
 
 .login-link a:hover {
   text-decoration: underline;
+}
+
+.error-message {
+  background-color: #ffe5e5;
+  color: #d8000c;
+  padding: var(--space-sm);
+  border-radius: 6px;
+  margin-bottom: var(--space-md);
+  font-size: 0.9rem;
 }
