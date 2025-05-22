@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { toggleFavorite } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import { FaHeart } from 'react-icons/fa';
 
 const FavoriteButton = ({ 
   recipeId, 

@@ -87,6 +87,8 @@ const Home = () => {
           {featuredRecipes.map(recipe => (
             <RecipeCard
               key={recipe._id}
+              showStats={true}
+              showFavoriteOnly={true}
               recipe={{
                 ...recipe,
                 image: getImageUrl(recipe.image),
@@ -120,6 +122,8 @@ const Home = () => {
                 categoryRecipes[category].map(recipe => (
                   <RecipeCard
                     key={recipe._id}
+                    showStats={true}
+                    showFavoriteOnly={true}
                     recipe={{
                       ...recipe,
                       image: getImageUrl(recipe.image),
@@ -143,6 +147,7 @@ const Home = () => {
             <RecipeCard
               key={recipe._id}
               showStats={true}
+              showFavoriteOnly={true}
               recipe={{
                 ...recipe,
                 image: getImageUrl(recipe.image),

@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import FavoriteButton from './FavoriteButton';
-import { FaHeart, FaStar, FaComment, FaClock } from 'react-icons/fa';
+import { FaHeart, FaStar, FaComment, FaClock, FaTimes } from 'react-icons/fa';
 import ImageWithFallback from './ImageWithFallback';
 import { getImageUrl, imageStyle } from '../utils/imageUtils';
 import './RecipeCard.css';
@@ -10,6 +10,7 @@ import './RecipeCard.css';
 const RecipeCard = ({
   recipe,
   showStats = false,
+  showFavoriteOnly = false,
   showRemoveButton = false,
   onRemove,
   extraInfo = null,
@@ -54,15 +55,21 @@ const RecipeCard = ({
 
           {showStats && (
             <div className="recipe-stats">
-              <div className="stat">
-                <FaHeart /> {recipe.favoriteCount || 0}
-              </div>
-              <div className="stat">
-                <FaStar /> {recipe.averageRating?.toFixed(1) || '0.0'}
-              </div>
-              <div className="stat">
-                <FaComment /> {recipe.reviews?.length || 0}
-              </div>
+              <FavoriteButton
+                recipeId={recipe._id}
+                initialCount={recipe.favoriteCount || 0}
+                isInitiallyFavorited={recipe.favorites?.includes(user?._id) || false}
+              />
+              {!showFavoriteOnly && (
+                <>
+                  <div className="stat">
+                    <FaStar /> {recipe.averageRating?.toFixed(1) || '0.0'}
+                  </div>
+                  <div className="stat">
+                    <FaComment /> {recipe.reviews?.length || 0}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -70,25 +77,19 @@ const RecipeCard = ({
         </div>
       </Link>
 
-      <div className="card-actions">
-        <FavoriteButton
-          recipeId={recipe._id}
-          initialCount={recipe.favoriteCount || 0}
-          isInitiallyFavorited={recipe.favorites?.includes(user?._id) || false}
-        />
-
-        {showRemoveButton && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              onRemove();
-            }}
-            className="remove-btn"
-          >
-            Remove
-          </button>
-        )}
-      </div>
+      {showRemoveButton && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            onRemove();
+          }}
+          className="remove-btn"
+          aria-label="Remove from favorites"
+        >
+          <FaTimes className="remove-icon" />
+          <span>Remove from Favorites</span>
+        </button>
+      )}
     </div>
   );
 };
