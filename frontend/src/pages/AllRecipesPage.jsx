@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllRecipes } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
-import { FaFilter, FaSort } from 'react-icons/fa';
+import { FaFilter, FaSort, FaCheck, FaCircle, FaUtensils, FaGlassMartiniAlt, FaIceCream, FaDrumstickBite } from 'react-icons/fa';
 import './AllRecipesPage.css';
 
 const AllRecipesPage = () => {
@@ -16,12 +16,21 @@ const AllRecipesPage = () => {
   const [sortBy, setSortBy] = useState('newest');
   const [searchQuery, setSearchQuery] = useState('');
   const limit = 12;
+  const [currentCategory, setCurrentCategory] = useState('all');
 
   const sortOptions = [
     { value: 'newest', label: 'Newest First' },
     { value: 'oldest', label: 'Oldest First' },
     { value: 'rating', label: 'Highest Rated' },
     { value: 'popular', label: 'Most Popular' }
+  ];
+
+  const categories = [
+    { id: 'all', title: 'All Recipes', description: 'Browse all recipes', icon: <FaUtensils /> },
+    { id: 'Appetizer', title: 'Appetizers', description: 'Starters and snacks', icon: <FaGlassMartiniAlt /> },
+    { id: 'Beverages', title: 'Beverages', description: 'Drinks and refreshments', icon: <FaGlassMartiniAlt /> },
+    { id: 'Desserts', title: 'Desserts', description: 'Sweet treats', icon: <FaIceCream /> },
+    { id: 'Meal', title: 'Main Meals', description: 'Complete dishes', icon: <FaDrumstickBite /> }
   ];
 
   const fetchAllRecipes = async () => {
@@ -91,6 +100,25 @@ const AllRecipesPage = () => {
         </div>
       </div>
 
+      <div className="recipe-timeline">
+        {categories.map((category, index) => (
+          <div 
+            key={category.id} 
+            className={`timeline-step ${currentCategory === category.id ? 'active' : ''}`}
+            onClick={() => setCurrentCategory(category.id)}
+          >
+            <div className="timeline-icon">
+              {currentCategory === category.id ? <FaCheck /> : category.icon}
+            </div>
+            <div className="timeline-content">
+              <h3>{category.title}</h3>
+              <p>{category.description}</p>
+            </div>
+            {index < categories.length - 1 && <div className="timeline-line" />}
+          </div>
+        ))}
+      </div>
+
       <div className={`filters-section ${showFilters ? 'show' : ''}`}>
         <form onSubmit={handleSearch} className="search-form">
           <input
@@ -116,11 +144,13 @@ const AllRecipesPage = () => {
       </div>
 
       <div className="recipes-grid">
-        {recipes.map(recipe => (
-          <div key={recipe._id} className="recipe-card-wrapper">
-            <RecipeCard recipe={recipe} showStats={true} />
-          </div>
-        ))}
+        {recipes
+          .filter(recipe => currentCategory === 'all' || recipe.category === currentCategory)
+          .map(recipe => (
+            <div key={recipe._id} className="recipe-card-wrapper">
+              <RecipeCard recipe={recipe} showStats={true} />
+            </div>
+          ))}
       </div>
 
       {totalPages > 1 && (

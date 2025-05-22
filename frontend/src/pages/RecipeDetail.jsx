@@ -22,7 +22,13 @@ import {
   FaShare, 
   FaPrint,
   FaBookmark,
-  FaRegBookmark
+  FaRegBookmark,
+  FaCheck,
+  FaCircle,
+  FaInfoCircle,
+  FaList,
+  FaClipboardList,
+  FaImage
 } from 'react-icons/fa';
 import './RecipeDetail.css';
 
@@ -41,6 +47,14 @@ const RecipeDetail = () => {
   const [relatedRecipes, setRelatedRecipes] = useState([]);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [servings, setServings] = useState(1);
+  const [currentSection, setCurrentSection] = useState(1);
+
+  const sections = [
+    { id: 1, title: 'Overview', description: 'Recipe information and image', icon: <FaInfoCircle /> },
+    { id: 2, title: 'Ingredients', description: 'List of ingredients needed', icon: <FaList /> },
+    { id: 3, title: 'Instructions', description: 'Step-by-step cooking guide', icon: <FaClipboardList /> },
+    { id: 4, title: 'Reviews', description: 'User reviews and ratings', icon: <FaImage /> }
+  ];
 
   const fetchRecipe = async () => {
     try {
@@ -76,6 +90,26 @@ const RecipeDetail = () => {
   useEffect(() => {
     fetchRecipe();
   }, [id, user]);
+
+  // Update current section based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const sections = document.querySelectorAll('.recipe-section');
+      
+      sections.forEach((section, index) => {
+        const sectionTop = section.offsetTop - 100;
+        const sectionBottom = sectionTop + section.offsetHeight;
+        
+        if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+          setCurrentSection(index + 1);
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this recipe?')) return;
@@ -181,6 +215,28 @@ const RecipeDetail = () => {
         ← Back
       </button>
 
+      <div className="recipe-timeline">
+        {sections.map((section, index) => (
+          <div 
+            key={section.id} 
+            className={`timeline-step ${currentSection >= section.id ? 'active' : ''}`}
+            onClick={() => {
+              const element = document.querySelector(`.recipe-section:nth-child(${section.id})`);
+              element?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <div className="timeline-icon">
+              {currentSection > section.id ? <FaCheck /> : section.icon}
+            </div>
+            <div className="timeline-content">
+              <h3>{section.title}</h3>
+              <p>{section.description}</p>
+            </div>
+            {index < sections.length - 1 && <div className="timeline-line" />}
+          </div>
+        ))}
+      </div>
+
       <div className="recipe-actions">
         <FavoriteButton 
           recipeId={id}
@@ -218,157 +274,147 @@ const RecipeDetail = () => {
         </button>
       </div>
 
-      {isEditing ? (
-        <RecipeForm 
-          recipe={recipe} 
-          onSubmit={handleUpdate} 
-          onCancel={() => setIsEditing(false)}
+      <div className="recipe-header recipe-section">
+        <h1>{recipe.name}</h1>
+        <span className={`category-badge ${recipe.category.toLowerCase()}`}>
+          {recipe.category}
+        </span>
+      </div>
+
+      <div className="recipe-meta-info recipe-section">
+        <div className="meta-item">
+          <FaClock />
+          <span>{recipe.cookingTime || '30'} mins</span>
+        </div>
+        <div className="meta-item">
+          <FaUtensils />
+          <span>{recipe.difficulty || 'Medium'}</span>
+        </div>
+        <div className="meta-item">
+          <FaUsers />
+          <span>{recipe.servings || 4} servings</span>
+        </div>
+      </div>
+
+      <div className="image-container recipe-section">
+        <img
+          src={getImageUrl(recipe.imageOptimized || recipe.image)}
+          alt={recipe.name}
+          onError={(e) => {
+            e.target.src = '/placeholder-recipe.jpg';
+          }}
+          className="detail-image"
         />
-      ) : (
-        <>
-          <div className="recipe-header">
-            <h1>{recipe.name}</h1>
-            <span className={`category-badge ${recipe.category.toLowerCase()}`}>
-              {recipe.category}
-            </span>
-          </div>
+      </div>
 
-          <div className="recipe-meta-info">
-            <div className="meta-item">
-              <FaClock />
-              <span>{recipe.cookingTime || '30'} mins</span>
-            </div>
-            <div className="meta-item">
-              <FaUtensils />
-              <span>{recipe.difficulty || 'Medium'}</span>
-            </div>
-            <div className="meta-item">
-              <FaUsers />
-              <span>{recipe.servings || 4} servings</span>
-            </div>
-          </div>
+      <div className="servings-adjuster">
+        <button onClick={() => adjustServings(servings - 1)}>-</button>
+        <span>{servings} servings</span>
+        <button onClick={() => adjustServings(servings + 1)}>+</button>
+      </div>
 
-          <div className="image-container">
-            <img
-              src={getImageUrl(recipe.imageOptimized || recipe.image)}
-              alt={recipe.name}
-              onError={(e) => {
-                e.target.src = '/placeholder-recipe.jpg';
-              }}
-              className="detail-image"
+      <div className="recipe-content">
+        <section className="ingredients recipe-section">
+          <h2>Ingredients</h2>
+          <ul>
+            {recipe.ingredients && recipe.ingredients.map((ingredient, i) => {
+              // Handle both string and object formats
+              if (typeof ingredient === 'string') {
+                return <li key={i}>{ingredient}</li>;
+              } else {
+                const amount = ingredient.amount || '';
+                const unit = ingredient.unit || '';
+                const name = ingredient.name || '';
+                const adjustedAmount = amount && servings !== (recipe.servings || 4) ? 
+                  (amount * (servings / (recipe.servings || 4))).toFixed(1) : 
+                  amount;
+                
+                return (
+                  <li key={i}>
+                    {adjustedAmount} {unit} {name}
+                  </li>
+                );
+              }
+            })}
+          </ul>
+        </section>
+
+        <section className="instructions recipe-section">
+          <h2>Instructions</h2>
+          <ol>
+            {recipe.instructions.map((instruction, i) => (
+              <li key={i} data-step={i + 1}>{instruction}</li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      <div className="rating-section recipe-section">
+        <h3>
+          Average Rating: {recipe.averageRating ? recipe.averageRating.toFixed(1) : 'Not rated yet'} 
+          <span className="review-count">({recipe.reviews?.length || 0} reviews)</span>
+        </h3>
+        
+        <div className="user-rating">
+          <h4>Your Rating:</h4>
+          <StarRating 
+            rating={userRating} 
+            onRate={setUserRating} 
+            editable={!!user}
+            showRating={true}
+          />
+        </div>
+        
+        {user && (
+          <div className="review-form">
+            <textarea
+              value={userReview}
+              onChange={(e) => setUserReview(e.target.value)}
+              placeholder="Leave a review (optional)"
             />
+            <button
+              onClick={handleSaveReview}
+              disabled={isSavingReview}
+              className="save-review-btn"
+            >
+              {isSavingReview ? 'Saving...' : 'Save Review'}
+            </button>
           </div>
+        )}
+      </div>
 
-          <div className="servings-adjuster">
-            <button onClick={() => adjustServings(servings - 1)}>-</button>
-            <span>{servings} servings</span>
-            <button onClick={() => adjustServings(servings + 1)}>+</button>
-          </div>
-
-          <div className="rating-section">
-            <h3>
-              Average Rating: {recipe.averageRating ? recipe.averageRating.toFixed(1) : 'Not rated yet'} 
-              <span className="review-count">({recipe.reviews?.length || 0} reviews)</span>
-            </h3>
-            
-            <div className="user-rating">
-              <h4>Your Rating:</h4>
-              <StarRating 
-                rating={userRating} 
-                onRate={setUserRating} 
-                editable={!!user}
-                showRating={true}
-              />
-            </div>
-            
-            {user && (
-              <div className="review-form">
-                <textarea
-                  value={userReview}
-                  onChange={(e) => setUserReview(e.target.value)}
-                  placeholder="Leave a review (optional)"
+      {recipe.reviews?.length > 0 && (
+        <div className="reviews-section">
+          <h3>Recent Reviews</h3>
+          {recipe.reviews.slice(0, 5).map((review, index) => (
+            <div key={index} className="review-item">
+              <div className="review-header">
+                <span className="review-author">
+                  {review.author?.name || 'Anonymous'}
+                </span>
+                <StarRating 
+                  rating={review.rating} 
+                  editable={false} 
+                  showRating={true}
                 />
-                <button
-                  onClick={handleSaveReview}
-                  disabled={isSavingReview}
-                  className="save-review-btn"
-                >
-                  {isSavingReview ? 'Saving...' : 'Save Review'}
-                </button>
               </div>
-            )}
-          </div>
-
-          <div className="recipe-content">
-            <section className="ingredients">
-              <h2>Ingredients</h2>
-              <ul>
-                {recipe.ingredients && recipe.ingredients.map((ingredient, i) => {
-                  // Handle both string and object formats
-                  if (typeof ingredient === 'string') {
-                    return <li key={i}>{ingredient}</li>;
-                  } else {
-                    const amount = ingredient.amount || '';
-                    const unit = ingredient.unit || '';
-                    const name = ingredient.name || '';
-                    const adjustedAmount = amount && servings !== (recipe.servings || 4) ? 
-                      (amount * (servings / (recipe.servings || 4))).toFixed(1) : 
-                      amount;
-                    
-                    return (
-                      <li key={i}>
-                        {adjustedAmount} {unit} {name}
-                      </li>
-                    );
-                  }
-                })}
-              </ul>
-            </section>
-
-            <section className="instructions">
-              <h2>Instructions</h2>
-              <ol>
-                {recipe.instructions.map((instruction, i) => (
-                  <li key={i}>{instruction}</li>
-                ))}
-              </ol>
-            </section>
-          </div>
-
-          {recipe.reviews?.length > 0 && (
-            <div className="reviews-section">
-              <h3>Recent Reviews</h3>
-              {recipe.reviews.slice(0, 5).map((review, index) => (
-                <div key={index} className="review-item">
-                  <div className="review-header">
-                    <span className="review-author">
-                      {review.author?.name || 'Anonymous'}
-                    </span>
-                    <StarRating 
-                      rating={review.rating} 
-                      editable={false} 
-                      showRating={true}
-                    />
-                  </div>
-                  {review.comment && (
-                    <p className="review-comment">{review.comment}</p>
-                  )}
-                </div>
-              ))}
+              {review.comment && (
+                <p className="review-comment">{review.comment}</p>
+              )}
             </div>
-          )}
+          ))}
+        </div>
+      )}
 
-          {relatedRecipes.length > 0 && (
-            <div className="related-recipes">
-              <h3>You May Also Like</h3>
-              <div className="recipes-grid">
-                {relatedRecipes.map(recipe => (
-                  <RecipeCard key={recipe._id} recipe={recipe} />
-                ))}
-              </div>
-            </div>
-          )}
-        </>
+      {relatedRecipes.length > 0 && (
+        <div className="related-recipes">
+          <h3>You May Also Like</h3>
+          <div className="recipes-grid">
+            {relatedRecipes.map(recipe => (
+              <RecipeCard key={recipe._id} recipe={recipe} />
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

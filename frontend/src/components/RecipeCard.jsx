@@ -2,9 +2,9 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import FavoriteButton from './FavoriteButton';
-import { FaHeart, FaStar, FaComment } from 'react-icons/fa';
+import { FaHeart, FaStar, FaComment, FaClock } from 'react-icons/fa';
 import ImageWithFallback from './ImageWithFallback';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, imageStyle } from '../utils/imageUtils';
 import './RecipeCard.css';
 
 const RecipeCard = ({
@@ -16,14 +16,13 @@ const RecipeCard = ({
 }) => {
   const { user } = useAuth();
 
-  // Define a consistent image style to ensure proper rendering
-  const consistentImageStyle = {
-    objectFit: 'cover',
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    top: 0,
-    left: 0
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
   };
 
   return (
@@ -34,7 +33,7 @@ const RecipeCard = ({
             <ImageWithFallback
               src={getImageUrl(recipe.imageOptimized || recipe.image)}
               alt={recipe.name}
-              style={consistentImageStyle}
+              style={imageStyle}
               fallbackSrc="/placeholder-recipe.jpg"
             />
           </div>
@@ -47,6 +46,11 @@ const RecipeCard = ({
 
         <div className="card-content">
           <h3>{recipe.name}</h3>
+          
+          <div className="recipe-date">
+            <FaClock />
+            <span>Added {formatDate(recipe.createdAt)}</span>
+          </div>
 
           {showStats && (
             <div className="recipe-stats">
