@@ -2,35 +2,54 @@
 .add-recipe-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: var(--space-xl) var(--space-md);
+  padding: 2rem 1rem;
 }
 
 .add-recipe-container {
-  background-color: var(--white);
-  padding: var(--space-xl);
+  background-color: white;
+  padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .recipe-form {
   display: grid;
-  gap: var(--space-lg);
+  gap: 1.5rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 0.5rem;
 }
 
-.array-field {
+.form-group label {
+  font-weight: 500;
+  color: var(--sage-green);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--warm-beige);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.array-input-group {
   display: flex;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-sm);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.array-field input,
-.array-field textarea {
+.array-input-group input,
+.array-input-group textarea {
   flex: 1;
 }
 
@@ -38,11 +57,10 @@
   background-color: transparent;
   border: 1px solid var(--error);
   color: var(--error);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: 4px;
-  font-size: 0.8rem;
+  width: 40px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
 
 .remove-btn:hover {
@@ -53,12 +71,10 @@
   background-color: transparent;
   border: 1px solid var(--sage-green);
   color: var(--sage-green);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: 4px;
-  font-size: 0.8rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s;
-  margin-top: var(--space-sm);
+  transition: all 0.2s;
   width: fit-content;
 }
 
@@ -66,11 +82,11 @@
   background-color: rgba(138, 142, 117, 0.1);
 }
 
-.image-preview-container {
-  margin-top: var(--space-md);
+.image-preview {
+  margin-top: 1rem;
 }
 
-.image-preview {
+.image-preview img {
   max-width: 100%;
   max-height: 300px;
   border-radius: 8px;
@@ -78,5 +94,31 @@
 }
 
 .submit-btn {
-  margin-top: var(--space-lg);
+  padding: 1rem;
+  background-color: var(--sage-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-btn:hover {
+  background-color: var(--dark-brown);
+}
+
+.submit-btn:disabled {
+  background-color: var(--warm-beige);
+  cursor: not-allowed;
+}
+
+.error {
+  border-color: var(--error) !important;
+}
+
+.error-message {
+  color: var(--error);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
