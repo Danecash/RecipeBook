@@ -1,6 +1,6 @@
 // frontend/src/components/CategoryButtons.jsx
 import { Link, useLocation } from 'react-router-dom';
-import './CategoryButtons.css';
+import '../styles/CategoryButtons.css';
 
 const categories = [
   { name: 'Appetizer', icon: '🥗' },

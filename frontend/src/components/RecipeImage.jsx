@@ -1,7 +1,7 @@
 // frontend/src/components/RecipeImage.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
-import './RecipeImage.css';
+import '../styles/RecipeImage.css';
 
 const RecipeImage = ({ recipe, alt = 'Recipe', className = '' }) => {
   const getImageUrl = (recipe) => {

@@ -15,7 +15,7 @@ import {
   FaUserCircle,
   FaSearch
 } from 'react-icons/fa';
-import './Navbar.css';
+
 
 const Navbar = () => {
   const { user, logout } = useAuth();

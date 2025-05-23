@@ -1,6 +1,6 @@
 // frontend/src/components/Footer.jsx
 import { FaUtensils, FaEnvelope, FaPhone, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
-import './Footer.css';
+import '../styles/Footer.css';
 
 const Footer = () => {
   return (

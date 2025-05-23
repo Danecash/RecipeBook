@@ -1,7 +1,7 @@
 // frontend/src/components/SectionHeader.jsx
 import { Link } from 'react-router-dom';
 import { FaArrowRight } from 'react-icons/fa';
-import './SectionHeader.css';
+import '../styles/SectionHeader.css';
 
 const SectionHeader = ({ title, link, linkText = 'more>>' }) => {
   return (

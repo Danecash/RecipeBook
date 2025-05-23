@@ -5,7 +5,7 @@ import FavoriteButton from './FavoriteButton';
 import { FaHeart, FaStar, FaComment, FaClock, FaTimes } from 'react-icons/fa';
 import ImageWithFallback from './ImageWithFallback';
 import { getImageUrl, imageStyle } from '../utils/imageUtils';
-import './RecipeCard.css';
+import '../styles/RecipeCard.css';
 
 const RecipeCard = ({
   recipe,
