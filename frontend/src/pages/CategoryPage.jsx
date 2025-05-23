@@ -5,6 +5,7 @@ import { getRecipesByCategory } from '../services/api';
 import RecipeCard from '../components/RecipeCard';
 import Pagination from '../components/Pagination';
 import { getImageUrl } from '../utils/imageUtils';
+import SectionHeader from '../components/SectionHeader';
 import '../styles/CategoryPage.css';
 
 const CategoryPage = () => {
@@ -43,27 +44,28 @@ const CategoryPage = () => {
 
   return (
     <div className="category-page">
-      <h1 className="category-title">{category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()} Recipes</h1>
-      <Link to="/" className="back-link">← Back to Home</Link>
+      <SectionHeader 
+        title={`${category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()} Recipes`} 
+        link="/"
+        backButton
+      />
 
       {recipes.length === 0 ? (
         <p>No recipes found in this category.</p>
       ) : (
         <>
-          <div className="ranked-recipes">
-            {recipes.map((recipe, index) => (
-              <div key={recipe._id} className="ranked-recipe">
-                <span className="recipe-rank">
-                  {(currentPage - 1) * limit + index + 1}
-                </span>
-                <RecipeCard
-                  recipe={{
-                    ...recipe,
-                    image: getImageUrl(recipe.image),
-                    imageOptimized: getImageUrl(recipe.imageOptimized),
-                  }}
-                />
-              </div>
+          <div className="recipes-grid">
+            {recipes.map((recipe) => (
+              <RecipeCard
+                key={recipe._id}
+                showStats={true}
+                showFavoriteOnly={true}
+                recipe={{
+                  ...recipe,
+                  image: getImageUrl(recipe.image),
+                  imageOptimized: getImageUrl(recipe.imageOptimized),
+                }}
+              />
             ))}
           </div>
 
