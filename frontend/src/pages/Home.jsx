@@ -81,23 +81,23 @@ const Home = () => {
       </section>
 
       {/* Featured Recipes */}
-      <section className="section">
-        <SectionHeader title="Featured Recipes" link="/all-recipes" />
-        <div className="recipes-grid">
-          {featuredRecipes.map(recipe => (
-            <RecipeCard
-              key={recipe._id}
-              showStats={true}
-              showFavoriteOnly={true}
-              recipe={{
-                ...recipe,
-                image: getImageUrl(recipe.image),
-                imageOptimized: getImageUrl(recipe.imageOptimized),
-              }}
-            />
-          ))}
-        </div>
-      </section>
+<section className="section">
+  <SectionHeader title="Featured Recipes" link="/all-recipes" />
+  <div className="featured-scroll-list">
+    {featuredRecipes.map(recipe => (
+      <RecipeCard
+        key={recipe._id}
+        showStats={true}
+        showFavoriteOnly={true}
+        recipe={{
+          ...recipe,
+          image: getImageUrl(recipe.image),
+          imageOptimized: getImageUrl(recipe.imageOptimized),
+        }}
+      />
+    ))}
+  </div>
+</section>
 
       {/* Category Recipes - Single Column, Horizontal Scroll */}
       <section className="section category-sections">
@@ -140,23 +140,24 @@ const Home = () => {
       </section>
 
       {/* Popular Recipes */}
-      <section className="section">
-        <SectionHeader title="Popular Recipes" icon={<FaFire />} link="/popular" />
-        <div className="recipes-grid">
-          {popularRecipes.map(recipe => (
-            <RecipeCard
-              key={recipe._id}
-              showStats={true}
-              showFavoriteOnly={true}
-              recipe={{
-                ...recipe,
-                image: getImageUrl(recipe.image),
-                imageOptimized: getImageUrl(recipe.imageOptimized),
-              }}
-            />
-          ))}
-        </div>
-      </section>
+<section className="section">
+  <SectionHeader title="Popular Recipes" icon={<FaFire />} link="/popular" />
+  <div className="popular-scroll-list">
+    {popularRecipes.map(recipe => (
+      <RecipeCard
+        key={recipe._id}
+        showStats={true}
+        showFavoriteOnly={true}
+        recipe={{
+          ...recipe,
+          image: getImageUrl(recipe.image),
+          imageOptimized: getImageUrl(recipe.imageOptimized),
+        }}
+      />
+    ))}
+  </div>
+</section>
+
     </div>
   );
 };

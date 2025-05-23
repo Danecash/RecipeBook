@@ -323,3 +323,41 @@
     padding: 3rem 1rem;
   }
 }
+
+.featured-scroll-list,
+.popular-scroll-list {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #fdfaf6 #e7f7cd;
+  align-items: stretch;
+}
+
+.featured-scroll-list::-webkit-scrollbar,
+.popular-scroll-list::-webkit-scrollbar {
+  height: 10px;
+}
+
+.featured-scroll-list::-webkit-scrollbar-thumb,
+.popular-scroll-list::-webkit-scrollbar-thumb {
+  background: #2c2b2b;
+  border-radius: 6px;
+}
+
+.featured-scroll-list::-webkit-scrollbar-track,
+.popular-scroll-list::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.featured-scroll-list .recipe-card,
+.popular-scroll-list .recipe-card {
+  min-width: 280px;
+  max-width: 280px;
+  flex: 0 0 280px;
+  height: 400px;
+  box-sizing: border-box;
+}
