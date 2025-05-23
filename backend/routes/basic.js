@@ -127,33 +127,54 @@ router.get("/category/:category", async (req, res) => {
 
 
 // UPDATE recipe
-
 router.put("/recipes/:id", upload.single('image'), validateRecipeData, async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ error: "Invalid recipe ID format" });
     }
 
+    // Find the existing recipe first
+    const existingRecipe = await Recipe.findById(req.params.id);
+    if (!existingRecipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
     const updateData = {
       name: req.body.name.trim(),
       category: req.body.category.trim(),
       ingredients: req.parsedData.ingredients,
-      instructions: req.parsedData.instructions
+      instructions: req.parsedData.instructions,
+      updatedAt: new Date()
     };
 
+    // Only update image if a new one was uploaded
     if (req.file) {
       const category = req.body.category.toLowerCase().replace(/\s+/g, '-');
       updateData.image = `/backend/uploads/${category}/${req.file.filename}`;
       updateData.imageOptimized = `${updateData.image}?w=800&h=600&fit=cover`;
+      
+      // Delete old image if it exists and isn't a URL
+      if (existingRecipe.image && !existingRecipe.image.startsWith('http')) {
+        const oldImagePath = path.join(__dirname, '..', existingRecipe.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
     }
 
     const updatedRecipe = await Recipe.findByIdAndUpdate(
-      req.params.id, updateData, { new: true, runValidators: true }
+      req.params.id, 
+      updateData, 
+      { 
+        new: true, 
+        runValidators: true 
+      }
     ).lean();
 
-    if (!updatedRecipe) return res.status(404).json({ error: "Recipe not found" });
-
-    res.json(formatRecipeImage(updatedRecipe));
+    res.json({
+      success: true,
+      data: formatRecipeImage(updatedRecipe)
+    });
   } catch (error) {
     console.error(`PUT /recipes/${req.params.id} error:`, error);
     res.status(500).json(serverError(error));
