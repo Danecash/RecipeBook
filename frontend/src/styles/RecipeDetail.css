@@ -50,8 +50,34 @@
   border-color: var(--red-500) !important;
 }
 
-.share-button, .print-button, .bookmark-button {
+.bookmark-button {
   color: var(--gray-600);
+  border: 1px solid var(--gray-300);
+  background: white;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: all 0.2s;
+}
+
+.bookmark-button:hover {
+  background-color: var(--gray-100);
+  color: var(--sage-green);
+  border-color: var(--sage-green);
+}
+
+.bookmark-button.active {
+  color: var(--sage-green);
+  border-color: var(--sage-green);
+  background-color: var(--sage-green-light);
+}
+
+.bookmark-button.active svg {
+  fill: var(--sage-green);
+  stroke: var(--sage-green);
 }
 
 .recipe-header {
