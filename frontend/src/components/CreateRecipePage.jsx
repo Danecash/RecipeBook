@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { addRecipe } from '../services/api';
-import './styles/CreateRecipePage.css';
+import '../styles/CreateRecipePage.css';
 
 const CreateRecipePage = () => {
   const [recipeName, setRecipeName] = useState('');

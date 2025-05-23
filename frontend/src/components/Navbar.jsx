@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import SearchBar from './SearchBar';
 import CategoryButtons from './CategoryButtons';
+import '../styles/Navbar.css';
 import {
   FaHome,
   FaFire,

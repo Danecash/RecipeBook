@@ -1,4 +1,4 @@
-/* frontend/src/pages/Home.css */
+/* frontend/src/styles/Home.css */
 .home-page {
   padding: var(--space-xl, 4rem) var(--space-md, 2rem);
   padding-top: 0;
@@ -220,6 +220,7 @@
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
