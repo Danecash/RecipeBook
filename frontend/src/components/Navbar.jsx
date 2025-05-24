@@ -1,7 +1,6 @@
 // frontend/src/components/Navbar.jsx
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import SearchBar from './SearchBar';
 import CategoryButtons from './CategoryButtons';
 import '../styles/Navbar.css';
 import {
@@ -52,6 +51,8 @@ const Navbar = () => {
               <FaSearch className="nav-icon" />
               <span>Find Recipes</span>
             </Link>
+            {/* Insert Category Dropdown here */}
+            <CategoryButtons />
           </div>
 
           {/* User Account Links */}
@@ -80,7 +81,7 @@ const Navbar = () => {
                 </div>
               </>
             ) : (
-              <>
+              <> 
                 <Link to="/login" className="nav-link">
                   <FaSignInAlt className="nav-icon" />
                   <span>Login</span>
@@ -97,7 +98,7 @@ const Navbar = () => {
       </nav>
 
       {/* Category Buttons below navbar */}
-      <CategoryButtons />
+      {/* <CategoryButtons /> */}
     </>
   );
 };

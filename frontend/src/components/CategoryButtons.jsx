@@ -1,6 +1,7 @@
 // frontend/src/components/CategoryButtons.jsx
 import { Link, useLocation } from 'react-router-dom';
-import '../styles/CategoryButtons.css';
+import { useState, useRef, useEffect } from 'react';
+import '../styles/Navbar.css';
 
 const categories = [
   { name: 'Appetizer', icon: '🥗' },
@@ -11,26 +12,54 @@ const categories = [
 
 const CategoryButtons = () => {
   const location = useLocation();
-  
-  return (
-    <div className="category-buttons-container">
-      <div className="category-buttons">
-        {categories.map((category) => {
-          const path = `/category/${category.name.toLowerCase()}`;
-          const isActive = location.pathname === path;
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-          return (
-            <Link 
-              key={category.name} 
-              to={path}
-              className={`category-button ${category.name.toLowerCase()} ${isActive ? 'active' : ''}`}
-            >
-              <span className="category-icon">{category.icon}</span>
-              {category.name}
-            </Link>
-          );
-        })}
-      </div>
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [open]);
+
+  return (
+    <div className="nav-category-dropdown" ref={dropdownRef}>
+      <button
+        className="nav-link category-dropdown-toggle"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        aria-haspopup="true"
+        type="button"
+      >
+        <span>Categories</span>
+      </button>
+      {open && (
+        <div className="category-dropdown-menu">
+          {categories.map((category) => {
+            const path = `/category/${category.name.toLowerCase()}`;
+            const isActive = location.pathname === path;
+            return (
+              <Link
+                key={category.name}
+                to={path}
+                className={`dropdown-item${isActive ? ' active' : ''}`}
+                onClick={() => setOpen(false)}
+              >
+                <span className="category-icon">{category.icon}</span>
+                {category.name}
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
