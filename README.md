@@ -1,4 +1,4 @@
-# 🍳 **Recipe Book**
+# 🍳 **Recipe Book | Elective 3 - Web Development | DS3A**
 
 ## 📌 Project Description
 
