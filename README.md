@@ -1,55 +1,75 @@
-# 🍽️ **Recipe Book**
+# 🍳 **Recipe Book**
 
 ## 📌 Project Description
 
-The Recipe Book is a web-based application that allows users to store, manage, and share their favorite recipes. It provides a structured way to organize recipes with ingredients, instructions, and categories. This project is built using Node.js with Express.js for the backend and integrates a database to store recipes.
-
-## 🥞 Pancakes Recipe Metadata
-
-| Key          | Description |
-|-------------|------------------------------------------------------------|
-| `_id`       | Unique identifier for the recipe in the database. |
-| `name`      | The name of the recipe. |
-| `category`  | The category of the dish (e.g., Breakfast, Lunch, Dinner). |
-| `ingredients` | A list of ingredients required for the recipe. |
-| `instructions` | Step-by-step cooking instructions for preparing the dish. |
+The Recipe Book is a web-based application that allows users to view, favorite and add recipe to share their favorite recipes. It provides a structured way to organize recipes with ingredients, instructions, and categories. This project is built using Node.js with Express.js for the backend and integrates a database to store recipes.
 
 - Backend: Node.js, Express.js
 - Database: MongoDB Atlas (CLOUD)
-- Frontend: to be implement
+- Frontend: react, css
 
 ## 📂 Project Structure
 ```
-/project-root
-│── /config            # Database and app configuration
-│── /node_modules      # Dependencies
-│── /src               # Main application logic
-│   ├── /controllers   # Handles business logic
-│   ├── /models        # Database schemas
-│   ├── /routes        # API routes
-│   ├── /views         # Frontend templates (if using EJS)
-│── /public            # Static assets (CSS, images, etc.)
-│── package.json       # Project metadata
-│── server.js          # Main entry point
-│── README.md          # Project documentation
+/RECIPEBOOK
+├── /backend                    # Backend logic
+│   ├── /config                # Configuration files (e.g., DB setup)
+│   ├── /middlewares           # Custom middleware functions
+│   ├── /models                # Mongoose models / DB schemas
+│   ├── /node_modules          # Backend dependencies
+│   ├── /routes                # Express route definitions
+│   ├── /uploads               # Uploaded files (e.g., images)
+│   ├── /utils                 # Utility/helper functions
+│   ├── .env                   # Environment variables
+│   ├── main.js                # Backend entry point
+│   ├── package.json           # Backend package metadata
+│   └── package-lock.json      # Backend dependency lock file
+│
+├── /frontend                  # Frontend logic (React)
+│   ├── /node_modules          # Frontend dependencies
+│   ├── /public                # Static assets (public-facing)
+│   ├── /src                   # React source code
+│   │   ├── /assets            # Images, fonts, etc.
+│   │   ├── /components        # Reusable React components
+│   │   ├── /context           # React Context API providers
+│   │   ├── /hooks             # Custom React hooks
+│   │   ├── /pages             # Page components (e.g., AddRecipe, App)
+│   │   ├── /services          # API service calls
+│   │   ├── /styles            # CSS / SCSS styles
+│   │   ├── /utils             # Frontend utility functions
+│   │   ├── App.jsx            # Root App component
+│   │   └── main.jsx           # React entry point
+│   ├── .env                   # Frontend environment variables
+│   ├── index.html             # HTML template
+│   ├── package.json           # Frontend package metadata
+│   ├── package-lock.json      # Frontend dependency lock file
+│   ├── vite.config.js         # Vite configuration
+│   ├── .gitignore             # Git ignored files
+│   ├── .prettierrc            # Prettier configuration
+│   ├── eslint.config.js       # ESLint configuration
+│   └── README.md              # Frontend documentation
+│
+├── /node_modules              # Root-level dependencies
+├── package-lock.json          # Root dependency lock file
+└── README.md                  # Root documentation
 ```
 ## TO GET STARTED
-### Start the Server
+### Start the Backend
 ```
+cd backend
 node server.js
 ```
 - The server will run at http://localhost:3000
 
-## 📌 API Endpoints
-
-| Method  | Endpoint      | Description          |
-|---------|-------------|----------------------|
-| **GET**    | `/recipes`     | Get all recipes |
-| **POST**   | `/recipes`     | Add a new recipe |
-| **GET**    | `/recipes/:id` | Get a recipe by ID |
-| **PUT**    | `/recipes/:id` | Update a recipe |
-| **DELETE** | `/recipes/:id` | Delete a recipe |
+### Start the Frontend
+```
+cd frontend
+npm run dev
+```
 
 
-📜 License. 
-This project is licensed under the MIT License.
+### Developers: 
+- Christine Joy Sorronda
+- Dane Casey Casino
+- Genheylou Felisilda
+- Jezzel Faith Gier
+- Usher Raymond Abainza
