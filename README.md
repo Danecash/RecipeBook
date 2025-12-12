@@ -56,7 +56,7 @@ The Recipe Book is a web-based application that allows users to view, favorite a
 ### Start the Backend
 ```
 cd backend
-node server.js
+node main.js
 ```
 - The server will run at http://localhost:3000
 
